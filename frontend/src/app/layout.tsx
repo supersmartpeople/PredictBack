@@ -25,6 +25,9 @@ export const metadata: Metadata = {
   title: "PredictBack | Prediction Markets Backtesting",
   description: "The future of prediction markets backtesting. Test your trading strategies with historical data from prediction markets.",
   keywords: ["prediction markets", "backtesting", "trading", "polymarket", "strategies"],
+  icons: {
+    icon: "/icon.jpg",
+  },
   openGraph: {
     title: "PredictBack | Prediction Markets Backtesting",
     description: "The future of prediction markets backtesting",
