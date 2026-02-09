@@ -15,9 +15,11 @@ import "@xyflow/react/dist/style.css";
 import { useWorkflowStore } from "@/lib/stores/workflowStore";
 import { nodeTypes, createDefaultNodeData } from "./nodes";
 import { NodePalette } from "./panels/NodePalette";
+import { TemplateSelector } from "./panels/TemplateSelector";
 import { serializeWorkflowToStrategy } from "./utils/serialization";
 import type { CustomStrategyParams } from "@/lib/api";
 import type { WorkflowNodeType, WorkflowNode } from "./types/workflow";
+import type { StrategyTemplate } from "./templates/strategyTemplates";
 
 interface WorkflowEditorProps {
   onRunBacktest?: (strategyConfig: CustomStrategyParams) => void;
@@ -44,6 +46,7 @@ function WorkflowEditorInner({ onRunBacktest }: WorkflowEditorProps) {
     setSelectedNode,
     validateWorkflow,
     clearWorkflow,
+    loadWorkflow,
     exportWorkflow,
     getNextNodeId,
     setOrderSize,
@@ -111,6 +114,10 @@ function WorkflowEditorInner({ onRunBacktest }: WorkflowEditorProps) {
       clearWorkflow();
     }
   }, [clearWorkflow]);
+
+  const handleLoadTemplate = useCallback((template: StrategyTemplate) => {
+    loadWorkflow(template.workflow);
+  }, [loadWorkflow]);
 
   // Memoize minimap node color function
   const minimapNodeColor = useMemo(() => {
@@ -197,6 +204,7 @@ function WorkflowEditorInner({ onRunBacktest }: WorkflowEditorProps) {
                 />
               </div>
               <div className="w-px h-6 bg-border" />
+              <TemplateSelector onLoadTemplate={handleLoadTemplate} />
               <button
                 onClick={handleValidate}
                 className="text-xs text-text-secondary hover:text-text-primary transition-colors px-2 py-1"
