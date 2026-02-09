@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 interface BreadcrumbItem {
@@ -47,8 +48,14 @@ export function GlobalNavbar() {
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Left: Logo + Brand */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-lg gradient-pink flex items-center justify-center shadow-lg shadow-pink-500/20 group-hover:shadow-pink-500/40 transition-shadow">
-            <span className="text-white font-bold text-base">P</span>
+          <div className="relative w-9 h-9 transition-transform group-hover:scale-105">
+            <Image
+              src="/logo.png"
+              alt="PredictBack Logo"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
           <span className="font-[family-name:var(--font-chakra)] font-bold text-xl text-pink-50 hidden sm:block">
             PredictBack
