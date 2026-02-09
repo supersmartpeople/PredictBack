@@ -237,6 +237,68 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* About Us Section */}
+      <section className="py-20 px-6 bg-bg-secondary/30">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="font-[family-name:var(--font-chakra)] text-3xl md:text-4xl font-bold text-pink-50 mb-4">
+              About Us
+            </h2>
+            <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+              Built by traders and developers who understand the market
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* TJ Profile */}
+            <div className="bg-bg-secondary border border-border rounded-xl p-8 card-hover">
+              <div className="flex flex-col items-center text-center">
+                <div className="relative w-32 h-32 rounded-full overflow-hidden mb-6 ring-2 ring-pink-500/20">
+                  <Image
+                    src="/tj.jpeg"
+                    alt="TJ"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <h3 className="font-[family-name:var(--font-chakra)] text-2xl font-bold text-pink-50 mb-2">
+                  TJ
+                </h3>
+                <div className="text-pink-400 font-medium mb-4">
+                  Co-Founder (Ex-COO, Product)
+                </div>
+                <p className="text-text-secondary leading-relaxed">
+                  Former COO and product leader who scaled institutional trading operations and infrastructure. Focused on turning real trading workflows into opinionated, usable tools for research and execution.
+                </p>
+              </div>
+            </div>
+
+            {/* JP Profile */}
+            <div className="bg-bg-secondary border border-border rounded-xl p-8 card-hover">
+              <div className="flex flex-col items-center text-center">
+                <div className="relative w-32 h-32 rounded-full overflow-hidden mb-6 ring-2 ring-pink-500/20">
+                  <Image
+                    src="/jp.jpeg"
+                    alt="JP"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <h3 className="font-[family-name:var(--font-chakra)] text-2xl font-bold text-pink-50 mb-2">
+                  JP
+                </h3>
+                <div className="text-pink-400 font-medium mb-4">
+                  Quant-Dev
+                </div>
+                <p className="text-text-secondary leading-relaxed">
+                  Quantitative developer with experience at two hedge funds, building systematic strategies and trading systems. Winner of the BasedLATAM hackathon with Bondi Finance, blending research rigor with fast prototyping.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="relative py-12 px-6 border-t border-border">
         <div className="max-w-7xl mx-auto">
