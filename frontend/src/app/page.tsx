@@ -4,7 +4,17 @@ import Link from "next/link";
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-bg-primary sakura-pattern">
+    <main className="min-h-screen bg-bg-primary sakura-pattern relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none">
+        {/* Gradient Orbs */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-1/3 right-1/4 w-80 h-80 bg-purple-500/15 rounded-full blur-3xl animate-float-delayed"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-pink-400/10 rounded-full blur-3xl animate-float-slow"></div>
+
+        {/* Grid Pattern Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f0a_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f0a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
+      </div>
       {/* Hero Section */}
       <section className="pt-16 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
@@ -44,10 +54,15 @@ export default function LandingPage() {
                 </svg>
               </Link>
               <a
-                href="#how-it-works"
+                href="https://predictback.gitbook.io/predictback-docs"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-transparent border border-border hover:border-pink-500/50 text-text-primary hover:text-pink-400 px-7 py-3.5 rounded-xl font-medium text-base transition-all duration-200 hover:bg-bg-tertiary"
               >
                 Learn More
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
               </a>
             </div>
           </div>
@@ -222,19 +237,61 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-border">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md gradient-pink flex items-center justify-center">
-              <span className="text-white font-bold text-xs">P</span>
+      <footer className="relative py-12 px-6 border-t border-border">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-md gradient-pink flex items-center justify-center">
+                <span className="text-white font-bold text-xs">P</span>
+              </div>
+              <span className="font-[family-name:var(--font-chakra)] font-semibold text-pink-50">
+                PredictBack
+              </span>
             </div>
-            <span className="font-[family-name:var(--font-chakra)] font-semibold text-pink-50">
-              PredictBack
-            </span>
+
+            {/* Social Links */}
+            <div className="flex items-center gap-6">
+              <a
+                href="https://x.com/PredictBack"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-text-tertiary hover:text-pink-400 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                <span className="text-sm hidden sm:inline">Twitter</span>
+              </a>
+              <a
+                href="https://medium.com/@ssp-labs"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-text-tertiary hover:text-pink-400 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zM20.96 12c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z"/>
+                </svg>
+                <span className="text-sm hidden sm:inline">Medium</span>
+              </a>
+              <a
+                href="https://predictback.gitbook.io/predictback-docs"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-text-tertiary hover:text-pink-400 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+                <span className="text-sm hidden sm:inline">Docs</span>
+              </a>
+            </div>
           </div>
-          <p className="text-text-tertiary text-sm">
-            © 2026 PredictBack. Built for the future of prediction markets.
-          </p>
+
+          <div className="text-center pt-6 border-t border-border">
+            <p className="text-text-tertiary text-sm">
+              © 2026 PredictBack. Built for the future of prediction markets.
+            </p>
+          </div>
         </div>
       </footer>
     </main>
