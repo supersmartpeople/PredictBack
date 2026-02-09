@@ -6,40 +6,61 @@ import Link from "next/link";
 import { fetchMarkets, fetchTopicInfo, fetchSubtopics, Market, Topic, SubtopicInfo } from "@/lib/api";
 import { BacktestForm } from "@/components/backtest";
 
-export default function MarketsPage() {
+export default function SubtopicPage() {
   const params = useParams();
   const topic = decodeURIComponent(params.topic as string);
+  const subtopic = decodeURIComponent(params.subtopic as string);
 
-  // Common state
   const [topicInfo, setTopicInfo] = useState<Topic | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // State for non-continuous (market selection)
   const [markets, setMarkets] = useState<Market[]>([]);
 
-  // State for subtopics
-  const [subtopics, setSubtopics] = useState<SubtopicInfo[]>([]);
-  const [hasSubtopics, setHasSubtopics] = useState(false);
+  // For group view (showing periods)
+  const [isGroupView, setIsGroupView] = useState(false);
+  const [periods, setPeriods] = useState<{ period: number; fullName: string }[]>([]);
 
   useEffect(() => {
     async function loadData() {
       try {
-        // First, check if this topic has subtopics
+        // First, fetch all subtopics to determine if this is a group or specific subtopic
         const subtopicsResponse = await fetchSubtopics(topic);
 
-        if (subtopicsResponse.count > 0) {
-          // Has subtopics - show subtopic selection
-          setHasSubtopics(true);
-          setSubtopics(subtopicsResponse.subtopics);
+        // Parse subtopics to check if current subtopic is a group name
+        const parseSubtopic = (subtopicName: string): { group: string; period: number | null } => {
+          const match = subtopicName.match(/^(.+?)\s+(\d+)$/);
+          if (match) {
+            return { group: match[1].trim(), period: parseInt(match[2], 10) };
+          }
+          return { group: subtopicName, period: null };
+        };
+
+        // Check if subtopic matches a group name
+        const matchingPeriods: { period: number; fullName: string; continuous: boolean }[] = [];
+        let isContinuous = false;
+
+        for (const st of subtopicsResponse.subtopics) {
+          const { group, period } = parseSubtopic(st.subtopic);
+          if (group === subtopic && period !== null) {
+            matchingPeriods.push({ period, fullName: st.subtopic, continuous: st.continuous });
+            isContinuous = st.continuous;
+          }
+        }
+
+        if (matchingPeriods.length > 0) {
+          // This is a group view - show periods
+          setIsGroupView(true);
+          setPeriods(matchingPeriods.sort((a, b) => a.period - b.period));
+          setTopicInfo({ name: topic, continuous: isContinuous, created_at: "", subtopic: null });
         } else {
-          // No subtopics - show original behavior
-          const info = await fetchTopicInfo(topic);
+          // This is a specific subtopic - show backtest form or markets
+          setIsGroupView(false);
+          const info = await fetchTopicInfo(topic, subtopic);
           setTopicInfo(info);
 
-          // If not continuous, also fetch markets
+          // For non-continuous, fetch markets filtered by subtopic
           if (info && !info.continuous) {
-            const data = await fetchMarkets(topic);
+            const data = await fetchMarkets(topic, subtopic);
             setMarkets(data.markets);
           }
         }
@@ -50,8 +71,7 @@ export default function MarketsPage() {
       }
     }
     loadData();
-  }, [topic]);
-
+  }, [topic, subtopic]);
 
   // Render loading state
   if (loading) {
@@ -90,92 +110,50 @@ export default function MarketsPage() {
     );
   }
 
-  // If has subtopics, parse and group them
-  if (hasSubtopics) {
-    // Parse subtopics to extract groups
-    // Example: "High Vol 1" → { group: "High Vol", period: 1 }
-    const parseSubtopic = (subtopic: string): { group: string; period: number | null } => {
-      // Match pattern: "Text Number" at the end
-      const match = subtopic.match(/^(.+?)\s+(\d+)$/);
-      if (match) {
-        return { group: match[1].trim(), period: parseInt(match[2], 10) };
-      }
-      // If no number, treat whole string as group
-      return { group: subtopic, period: null };
-    };
-
-    // Group subtopics by their base name
-    const groupedSubtopics = subtopics.reduce((acc, subtopicInfo) => {
-      const { group, period } = parseSubtopic(subtopicInfo.subtopic);
-      if (!acc[group]) {
-        acc[group] = {
-          groupName: group,
-          periods: [],
-          continuous: subtopicInfo.continuous,
-        };
-      }
-      if (period !== null) {
-        acc[group].periods.push({ period, fullName: subtopicInfo.subtopic });
-      }
-      return acc;
-    }, {} as Record<string, { groupName: string; periods: { period: number; fullName: string }[]; continuous: boolean }>);
-
-    const groups = Object.values(groupedSubtopics).map(g => ({
-      ...g,
-      periods: g.periods.sort((a, b) => a.period - b.period),
-    }));
-
+  // If this is a group view, show period selection
+  if (isGroupView) {
     return (
       <main className="min-h-screen bg-bg-primary">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="mb-10">
             <Link
-              href="/topics"
+              href={`/topics/${encodeURIComponent(topic)}`}
               className="inline-flex items-center text-text-tertiary hover:text-pink-400 text-sm mb-4 transition-colors"
             >
               <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Back to Topics
+              Back to Groups
             </Link>
             <h1 className="font-[family-name:var(--font-chakra)] text-3xl md:text-4xl font-bold text-pink-50 mb-3 capitalize">
-              {topic.replace(/-/g, " ")} - Select Group
+              {topic.replace(/-/g, " ")} - {subtopic}
             </h1>
             <p className="text-text-secondary text-lg">
-              Choose a market condition group
+              Select a period to run backtest
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {groups.map((group, i) => (
+            {periods.map((periodInfo, i) => (
               <Link
-                key={group.groupName}
-                href={`/topics/${encodeURIComponent(topic)}/${encodeURIComponent(group.groupName)}`}
+                key={periodInfo.fullName}
+                href={`/topics/${encodeURIComponent(topic)}/${encodeURIComponent(periodInfo.fullName)}`}
                 className="group bg-bg-secondary rounded-xl border border-border p-6 card-hover animate-fade-in-up"
                 style={{ animationDelay: `${i * 0.1}s` }}
               >
-                <div className="w-14 h-14 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-4 group-hover:bg-purple-500/20 transition-colors">
+                <div className="w-14 h-14 rounded-xl bg-bullish/10 text-bullish flex items-center justify-center mb-4 group-hover:bg-bullish/20 transition-colors">
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <h2 className="font-[family-name:var(--font-chakra)] text-xl font-semibold text-pink-50 mb-2">
-                  {group.groupName}
+                  Period {periodInfo.period}
                 </h2>
-                <div className="flex items-center gap-2 text-text-tertiary text-sm mb-2">
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                    group.continuous
-                      ? "bg-bullish/10 text-bullish"
-                      : "bg-pink-500/10 text-pink-400"
-                  }`}>
-                    {group.continuous ? "Continuous" : "Event-based"}
-                  </span>
-                  <span className="text-xs text-text-tertiary">
-                    {group.periods.length} period{group.periods.length !== 1 ? "s" : ""}
-                  </span>
-                </div>
-                <div className="mt-4 flex items-center text-purple-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                  View Periods
+                <p className="text-text-tertiary text-sm mb-2">
+                  {periodInfo.fullName}
+                </p>
+                <div className="mt-4 flex items-center text-bullish text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                  Run Backtest
                   <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
@@ -188,38 +166,39 @@ export default function MarketsPage() {
     );
   }
 
-  // For continuous markets, use the shared BacktestForm component
+  // For continuous markets, use BacktestForm with subtopic
   if (topicInfo?.continuous) {
     return (
       <BacktestForm
         mode="continuous"
         topic={topic}
+        subtopic={subtopic}
         backLink={{
-          href: "/topics",
-          label: "Back to Topics",
+          href: `/topics/${encodeURIComponent(topic)}`,
+          label: "Back to Subtopics",
         }}
-        title={topic.replace(/-/g, " ")}
+        title={`${topic.replace(/-/g, " ")} - ${subtopic}`}
         subtitle="Continuous Market - Backtest across multiple sequential markets"
       />
     );
   }
 
-  // Render non-continuous (market selection) - original behavior
+  // For non-continuous, show market selection (similar to existing code)
   return (
     <main className="min-h-screen bg-bg-primary">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-10">
           <Link
-            href="/topics"
+            href={`/topics/${encodeURIComponent(topic)}`}
             className="inline-flex items-center text-text-tertiary hover:text-pink-400 text-sm mb-4 transition-colors"
           >
             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Topics
+            Back to Subtopics
           </Link>
           <h1 className="font-[family-name:var(--font-chakra)] text-3xl md:text-4xl font-bold text-pink-50 mb-3 capitalize">
-            {topic.replace(/-/g, " ")}
+            {topic.replace(/-/g, " ")} - {subtopic}
           </h1>
           <p className="text-text-secondary text-lg">
             Select a market to run backtests
@@ -261,7 +240,7 @@ export default function MarketsPage() {
               </svg>
             </div>
             <h3 className="text-text-primary text-lg font-medium mb-2">No markets available</h3>
-            <p className="text-text-tertiary">This topic doesn&apos;t have any markets yet</p>
+            <p className="text-text-tertiary">This subtopic doesn&apos;t have any markets yet</p>
           </div>
         )}
 

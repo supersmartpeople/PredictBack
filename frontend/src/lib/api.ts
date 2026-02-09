@@ -19,8 +19,18 @@ function getApiBaseUrl(): string {
 }
 
 export interface Topic {
+  id?: number | null;
   name: string;
   continuous: boolean;
+  created_at: string;
+  subtopic?: string | null;
+  subtopic_count?: number;
+}
+
+export interface SubtopicInfo {
+  subtopic: string;
+  continuous: boolean;
+  created_at: string;
 }
 
 export interface TopicsResponse {
@@ -28,10 +38,17 @@ export interface TopicsResponse {
   count: number;
 }
 
+export interface SubtopicsResponse {
+  topic: string;
+  subtopics: SubtopicInfo[];
+  count: number;
+}
+
 export interface Market {
   clob_token_id: string;
   topic: string;
   question: string;
+  subtopic?: string | null;
 }
 
 export interface MarketsResponse {
@@ -99,6 +116,7 @@ export type StrategyParams = GridStrategyParams | MomentumStrategyParams | Custo
 export interface BacktestRequest {
   clob_token_id?: string;
   topic?: string;
+  subtopic?: string | null;
   amount_of_markets?: number;
   strategy: StrategyParams;
   fee_rate: string;
@@ -130,14 +148,30 @@ export async function fetchTopics(): Promise<TopicsResponse> {
   return response.json();
 }
 
-export async function fetchTopicInfo(topicName: string): Promise<Topic | null> {
+export async function fetchTopicInfo(topicName: string, subtopic?: string): Promise<Topic | null> {
   const response = await fetchTopics();
   return response.topics.find(t => t.name === topicName) || null;
 }
 
-export async function fetchMarkets(topic?: string): Promise<MarketsResponse> {
-  const params = topic ? `?topic=${encodeURIComponent(topic)}` : "";
-  const response = await fetch(`${getApiBaseUrl()}/topics/markets${params}`);
+export async function fetchSubtopics(topicName: string): Promise<SubtopicsResponse> {
+  const response = await fetch(
+    `${getApiBaseUrl()}/topics/${encodeURIComponent(topicName)}/subtopics`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch subtopics");
+  }
+  return response.json();
+}
+
+export async function fetchMarkets(topic?: string, subtopic?: string): Promise<MarketsResponse> {
+  const params = new URLSearchParams();
+  if (topic) params.append("topic", topic);
+  if (subtopic) params.append("subtopic", subtopic);
+
+  const queryString = params.toString();
+  const url = `${getApiBaseUrl()}/topics/markets${queryString ? '?' + queryString : ''}`;
+
+  const response = await fetch(url);
   if (!response.ok) {
     throw new Error("Failed to fetch markets");
   }

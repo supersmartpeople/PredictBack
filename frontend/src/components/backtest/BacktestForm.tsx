@@ -67,6 +67,7 @@ interface BacktestFormProps {
   marketId?: string;
   // For continuous markets
   topic?: string;
+  subtopic?: string | null;
   // Back link configuration
   backLink: {
     href: string;
@@ -103,7 +104,7 @@ const OPERATOR_LABELS: Record<ConditionOperator, string> = {
   "cross_below": "Crosses below",
 };
 
-export function BacktestForm({ mode, marketId, topic, backLink, title, subtitle }: BacktestFormProps) {
+export function BacktestForm({ mode, marketId, topic, subtopic, backLink, title, subtitle }: BacktestFormProps) {
   const [strategy, setStrategy] = useState<StrategyType>("custom");
   const [feeRate, setFeeRate] = useState("0.001");
   const [loading, setLoading] = useState(false);
@@ -365,6 +366,7 @@ export function BacktestForm({ mode, marketId, topic, backLink, title, subtitle 
     if (mode === "continuous") {
       return {
         topic: topic!,
+        subtopic: subtopic || undefined,
         amount_of_markets: amountOfMarkets,
         strategy: strategyParams,
         fee_rate: feeRate,

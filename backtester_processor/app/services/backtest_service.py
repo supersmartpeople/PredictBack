@@ -84,30 +84,34 @@ class BacktestService:
 
     def _run_topic_continuous_backtest(self, request: BacktestRequest) -> BacktestResponse:
         """
-        Run a continuous multi-market backtest using topic name.
+        Run a continuous multi-market backtest using topic name and optional subtopic.
 
-        Fetches all markets in the topic, sorts by timestamp,
+        Fetches all markets in the topic (and subtopic if specified), sorts by timestamp,
         and runs the backtest across the most recent N markets.
         """
-        # Validate topic exists and is continuous
-        topic_info = self.repository.get_topic_info(request.topic)
+        # Validate topic (and subtopic) exists and is continuous
+        topic_info = self.repository.get_topic_info(request.topic, request.subtopic)
         if not topic_info:
-            raise TopicNotFoundError(f"Topic '{request.topic}' not found")
+            subtopic_str = f" (subtopic: {request.subtopic})" if request.subtopic else ""
+            raise TopicNotFoundError(f"Topic '{request.topic}'{subtopic_str} not found")
 
         if not topic_info.get("continuous"):
+            subtopic_str = f" (subtopic: {request.subtopic})" if request.subtopic else ""
             raise TopicNotContinuousError(
-                f"Topic '{request.topic}' is not a continuous market topic"
+                f"Topic '{request.topic}'{subtopic_str} is not a continuous market topic"
             )
 
-        # Get continuous markets for the topic
+        # Get continuous markets for the topic (and subtopic)
         markets = self.repository.get_continuous_markets_by_topic(
             request.topic,
+            subtopic=request.subtopic,
             amount=request.amount_of_markets,
         )
 
         if not markets:
+            subtopic_str = f" (subtopic: {request.subtopic})" if request.subtopic else ""
             raise InsufficientDataError(
-                f"No markets found for topic '{request.topic}'"
+                f"No markets found for topic '{request.topic}'{subtopic_str}"
             )
 
         # Fetch trade data for each market
@@ -123,8 +127,9 @@ class BacktestService:
                 market_data.append((market.get("market_slug", clob_id), df))
 
         if not market_data:
+            subtopic_str = f" (subtopic: {request.subtopic})" if request.subtopic else ""
             raise InsufficientDataError(
-                f"No trade data found for any markets in topic '{request.topic}'"
+                f"No trade data found for any markets in topic '{request.topic}'{subtopic_str}"
             )
 
         # Create strategy instance

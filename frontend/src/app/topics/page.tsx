@@ -87,6 +87,11 @@ export default function TopicsPage() {
                   }`}>
                     {topic.continuous ? "Continuous" : "Event-based"}
                   </span>
+                  {topic.subtopic_count && topic.subtopic_count > 0 && (
+                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400">
+                      {topic.subtopic_count} subtopic{topic.subtopic_count !== 1 ? 's' : ''}
+                    </span>
+                  )}
                 </div>
                 <div className="mt-4 flex items-center text-pink-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                   View Markets

@@ -120,6 +120,10 @@ class BacktestRequest(BaseModel):
         description="Topic name for continuous market backtesting. "
                     "When provided with amount_of_markets, backtests across multiple sequential markets."
     )
+    subtopic: Optional[str] = Field(
+        default=None,
+        description="Optional subtopic identifier for filtering markets within a topic."
+    )
     strategy: StrategyConfig = Field(..., description="Strategy configuration")
     fee_rate: Decimal = Field(default=Decimal("0.001"), ge=0, le=1, description="Trading fee rate (0.001 = 0.1%)")
     limit: Optional[int] = Field(default=None, ge=1, description="Maximum number of trades to process")
@@ -191,8 +195,17 @@ class ErrorResponse(BaseModel):
 # Topic Models
 class Topic(BaseModel):
     """Topic/category model."""
-    id: int
+    id: Optional[int] = None
     name: str
+    continuous: bool
+    created_at: datetime
+    subtopic: Optional[str] = None
+    subtopic_count: Optional[int] = 0
+
+
+class SubtopicInfo(BaseModel):
+    """Subtopic information."""
+    subtopic: str
     continuous: bool
     created_at: datetime
 
@@ -203,6 +216,13 @@ class TopicsResponse(BaseModel):
     count: int
 
 
+class SubtopicsResponse(BaseModel):
+    """Response model for subtopics list."""
+    topic: str
+    subtopics: list[SubtopicInfo]
+    count: int
+
+
 class MarketInfo(BaseModel):
     """Market information."""
     clob_token_id: str
@@ -210,6 +230,7 @@ class MarketInfo(BaseModel):
     question: Optional[str]
     neg: bool
     topic: Optional[str]
+    subtopic: Optional[str] = None
 
 
 class MarketsResponse(BaseModel):
