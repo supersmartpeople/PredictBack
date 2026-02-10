@@ -1,4 +1,13 @@
-import type { WorkflowGraph } from "../types/workflow";
+import type { WorkflowGraph, WorkflowNodeData } from "../types/workflow";
+
+// Helper to create base node data with required fields
+function createNodeData<T extends Partial<WorkflowNodeData>>(data: T): T & { isValid: boolean; validationErrors: string[] } {
+  return {
+    ...data,
+    isValid: true,
+    validationErrors: [],
+  } as T & { isValid: boolean; validationErrors: string[] };
+}
 
 export interface StrategyTemplate {
   id: string;
@@ -22,70 +31,70 @@ export const strategyTemplates: StrategyTemplate[] = [
           id: "node_0",
           type: "price-data",
           position: { x: 100, y: 200 },
-          data: {
-            nodeType: "price-data",
+          data: createNodeData({
+            nodeType: "price-data" as const,
             label: "Price Data",
-          },
+          }),
         },
         {
           id: "node_1",
           type: "sma",
           position: { x: 300, y: 100 },
-          data: {
-            nodeType: "sma",
+          data: createNodeData({
+            nodeType: "sma" as const,
             label: "Fast SMA",
             outputName: "sma_fast",
             period: 10,
-          },
+          }),
         },
         {
           id: "node_2",
           type: "sma",
           position: { x: 300, y: 300 },
-          data: {
-            nodeType: "sma",
+          data: createNodeData({
+            nodeType: "sma" as const,
             label: "Slow SMA",
             outputName: "sma_slow",
             period: 30,
-          },
+          }),
         },
         {
           id: "node_3",
           type: "crossover",
           position: { x: 550, y: 150 },
-          data: {
-            nodeType: "crossover",
+          data: createNodeData({
+            nodeType: "crossover" as const,
             label: "Golden Cross",
-            direction: "above",
-          },
+            operator: "cross_above" as const,
+          }),
         },
         {
           id: "node_4",
           type: "crossover",
           position: { x: 550, y: 250 },
-          data: {
-            nodeType: "crossover",
+          data: createNodeData({
+            nodeType: "crossover" as const,
             label: "Death Cross",
-            direction: "below",
-          },
+            operator: "cross_below" as const,
+          }),
         },
         {
           id: "node_5",
           type: "buy-signal",
           position: { x: 750, y: 150 },
-          data: {
-            nodeType: "buy-signal",
+          data: createNodeData({
+            nodeType: "buy-signal" as const,
             label: "Buy Signal",
-          },
+          }),
         },
         {
           id: "node_6",
           type: "sell-signal",
           position: { x: 750, y: 250 },
-          data: {
-            nodeType: "sell-signal",
+          data: createNodeData({
+            nodeType: "sell-signal" as const,
             label: "Sell Signal",
-          },
+          }),
         },
       ],
       edges: [
@@ -118,61 +127,61 @@ export const strategyTemplates: StrategyTemplate[] = [
           id: "node_0",
           type: "price-data",
           position: { x: 100, y: 200 },
-          data: {
-            nodeType: "price-data",
+          data: createNodeData({
+            nodeType: "price-data" as const,
             label: "Price Data",
-          },
+          }),
         },
         {
           id: "node_1",
           type: "rsi",
           position: { x: 300, y: 200 },
-          data: {
-            nodeType: "rsi",
+          data: createNodeData({
+            nodeType: "rsi" as const,
             label: "RSI",
             outputName: "rsi",
             period: 14,
-          },
+          }),
         },
         {
           id: "node_2",
           type: "compare",
           position: { x: 500, y: 150 },
-          data: {
-            nodeType: "compare",
+          data: createNodeData({
+            nodeType: "compare" as const,
             label: "RSI < 30 (Oversold)",
-            operator: "<",
-            value: 30,
-          },
+            operator: "<" as const,
+            compareToValue: 30,
+          }),
         },
         {
           id: "node_3",
           type: "compare",
           position: { x: 500, y: 250 },
-          data: {
-            nodeType: "compare",
+          data: createNodeData({
+            nodeType: "compare" as const,
             label: "RSI > 70 (Overbought)",
-            operator: ">",
-            value: 70,
-          },
+            operator: ">" as const,
+            compareToValue: 70,
+          }),
         },
         {
           id: "node_4",
           type: "buy-signal",
           position: { x: 700, y: 150 },
-          data: {
-            nodeType: "buy-signal",
+          data: createNodeData({
+            nodeType: "buy-signal" as const,
             label: "Buy Signal",
-          },
+          }),
         },
         {
           id: "node_5",
           type: "sell-signal",
           position: { x: 700, y: 250 },
-          data: {
-            nodeType: "sell-signal",
+          data: createNodeData({
+            nodeType: "sell-signal" as const,
             label: "Sell Signal",
-          },
+          }),
         },
       ],
       edges: [
@@ -202,62 +211,60 @@ export const strategyTemplates: StrategyTemplate[] = [
           id: "node_0",
           type: "price-data",
           position: { x: 100, y: 250 },
-          data: {
-            nodeType: "price-data",
+          data: createNodeData({
+            nodeType: "price-data" as const,
             label: "Price Data",
-          },
+          }),
         },
         {
           id: "node_1",
           type: "bollinger",
           position: { x: 300, y: 250 },
-          data: {
-            nodeType: "bollinger",
+          data: createNodeData({
+            nodeType: "bollinger" as const,
             label: "Bollinger Bands",
             outputName: "bb",
             period: 20,
             numStd: 2,
-          },
+          }),
         },
         {
           id: "node_2",
           type: "compare",
           position: { x: 550, y: 150 },
-          data: {
-            nodeType: "compare",
+          data: createNodeData({
+            nodeType: "compare" as const,
             label: "Price <= Lower Band",
-            operator: "<=",
-            compareToIndicator: "bb.lower",
-          },
+            operator: "<=" as const,
+          }),
         },
         {
           id: "node_3",
           type: "compare",
           position: { x: 550, y: 350 },
-          data: {
-            nodeType: "compare",
+          data: createNodeData({
+            nodeType: "compare" as const,
             label: "Price >= Upper Band",
-            operator: ">=",
-            compareToIndicator: "bb.upper",
-          },
+            operator: ">=" as const,
+          }),
         },
         {
           id: "node_4",
           type: "buy-signal",
           position: { x: 750, y: 150 },
-          data: {
-            nodeType: "buy-signal",
+          data: createNodeData({
+            nodeType: "buy-signal" as const,
             label: "Buy Signal",
-          },
+          }),
         },
         {
           id: "node_5",
           type: "sell-signal",
           position: { x: 750, y: 350 },
-          data: {
-            nodeType: "sell-signal",
+          data: createNodeData({
+            nodeType: "sell-signal" as const,
             label: "Sell Signal",
-          },
+          }),
         },
       ],
       edges: [
@@ -289,61 +296,61 @@ export const strategyTemplates: StrategyTemplate[] = [
           id: "node_0",
           type: "price-data",
           position: { x: 100, y: 200 },
-          data: {
-            nodeType: "price-data",
+          data: createNodeData({
+            nodeType: "price-data" as const,
             label: "Price Data",
-          },
+          }),
         },
         {
           id: "node_1",
           type: "macd",
           position: { x: 300, y: 200 },
-          data: {
-            nodeType: "macd",
+          data: createNodeData({
+            nodeType: "macd" as const,
             label: "MACD",
             outputName: "macd",
             fastPeriod: 12,
             slowPeriod: 26,
             signalPeriod: 9,
-          },
+          }),
         },
         {
           id: "node_2",
           type: "crossover",
           position: { x: 550, y: 150 },
-          data: {
-            nodeType: "crossover",
+          data: createNodeData({
+            nodeType: "crossover" as const,
             label: "MACD Cross Above",
-            direction: "above",
-          },
+            operator: "cross_above" as const,
+          }),
         },
         {
           id: "node_3",
           type: "crossover",
           position: { x: 550, y: 250 },
-          data: {
-            nodeType: "crossover",
+          data: createNodeData({
+            nodeType: "crossover" as const,
             label: "MACD Cross Below",
-            direction: "below",
-          },
+            operator: "cross_below" as const,
+          }),
         },
         {
           id: "node_4",
           type: "buy-signal",
           position: { x: 750, y: 150 },
-          data: {
-            nodeType: "buy-signal",
+          data: createNodeData({
+            nodeType: "buy-signal" as const,
             label: "Buy Signal",
-          },
+          }),
         },
         {
           id: "node_5",
           type: "sell-signal",
           position: { x: 750, y: 250 },
-          data: {
-            nodeType: "sell-signal",
+          data: createNodeData({
+            nodeType: "sell-signal" as const,
             label: "Sell Signal",
-          },
+          }),
         },
       ],
       edges: [
