@@ -319,6 +319,48 @@ class PolymarketRepository:
                 # Filter to only include topics that have at least one market
                 return [r for r in results if r['total_markets'] > 0]
 
+    def get_topic_date_ranges(self) -> dict[str, dict]:
+        """
+        Get the earliest and latest trade dates for each topic.
+        Returns a dict mapping topic name to {min_date, max_date}.
+        """
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                # Get all topic-market mappings
+                cur.execute("""
+                    SELECT t.name as topic, m.clob_token_id,
+                           COALESCE(
+                               (SELECT yes_token_id FROM hist_markets WHERE clob_token_id = m.clob_token_id),
+                               m.clob_token_id
+                           ) as yes_id
+                    FROM topics t
+                    JOIN hist_markets m ON m.topic_id = t.id
+                    ORDER BY t.name
+                """)
+                rows = cur.fetchall()
+
+                results: dict[str, dict] = {}
+                for topic_name, clob_id, yes_id in rows:
+                    table_name = f"hist_trades_{yes_id[:15]}"
+                    try:
+                        cur.execute(
+                            f"SELECT MIN(block_time), MAX(block_time) FROM {table_name}"
+                        )
+                        row = cur.fetchone()
+                        if row and row[0]:
+                            if topic_name not in results:
+                                results[topic_name] = {"min_date": row[0], "max_date": row[1]}
+                            else:
+                                if row[0] < results[topic_name]["min_date"]:
+                                    results[topic_name]["min_date"] = row[0]
+                                if row[1] > results[topic_name]["max_date"]:
+                                    results[topic_name]["max_date"] = row[1]
+                    except Exception:
+                        conn.rollback()
+                        continue
+
+                return results
+
     def get_topic_info(self, name: str, subtopic: Optional[str] = None) -> Optional[dict]:
         """
         Get topic info by name and optional subtopic.

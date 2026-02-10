@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { fetchTopics, Topic } from "@/lib/api";
 
 export default function TopicsPage() {
@@ -23,9 +24,78 @@ export default function TopicsPage() {
     loadTopics();
   }, []);
 
+  // Split topics: first 3 (BTC, ETH, SOL) go on a special row, rest in grid
+  const cryptoTopics = topics.slice(0, 3);
+  const remainingTopics = topics.slice(3);
+
+  const renderTopicCard = (topic: Topic, i: number, compact = false) => (
+    <Link
+      key={topic.name}
+      href={`/topics/${encodeURIComponent(topic.name)}`}
+      className="group bg-bg-secondary rounded-xl border border-border p-5 card-hover animate-fade-in-up"
+      style={{ animationDelay: `${i * 0.05}s` }}
+    >
+      <div className="flex items-start gap-4">
+        <div className="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-pink-500/20 transition-colors overflow-hidden">
+          {topic.icon_url ? (
+            <Image
+              src={topic.icon_url}
+              alt={topic.name}
+              width={48}
+              height={48}
+              className="w-full h-full object-cover rounded-xl"
+              unoptimized
+            />
+          ) : topic.continuous ? (
+            <svg className="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h2 className="font-[family-name:var(--font-chakra)] text-lg font-semibold text-pink-50 mb-1">
+            {topic.name}
+          </h2>
+          <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+              topic.continuous
+                ? "bg-bullish/10 text-bullish"
+                : "bg-pink-500/10 text-pink-400"
+            }`}>
+              {topic.continuous ? "Continuous" : "Event-based"}
+            </span>
+            {topic.negrisk && (
+              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-orange-500/10 text-orange-400">
+                Negrisk
+              </span>
+            )}
+            {topic.subtopic_count && topic.subtopic_count > 0 && (
+              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400">
+                {topic.subtopic_count} subtopic{topic.subtopic_count !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+          {topic.date_range && (
+            <p className="text-text-tertiary text-xs">
+              {topic.date_range}
+            </p>
+          )}
+        </div>
+        <div className="flex-shrink-0 self-center">
+          <svg className="w-5 h-5 text-text-tertiary group-hover:text-pink-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </div>
+    </Link>
+  );
+
   return (
     <main className="min-h-screen bg-bg-primary">
-      {/* Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-10">
           <h1 className="font-[family-name:var(--font-chakra)] text-3xl md:text-4xl font-bold text-pink-50 mb-3">
@@ -37,12 +107,29 @@ export default function TopicsPage() {
         </div>
 
         {loading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-bg-secondary rounded-xl border border-border p-6">
-                <div className="skeleton h-12 w-12 rounded-xl mb-4"></div>
-                <div className="skeleton h-6 w-32 rounded mb-2"></div>
-                <div className="skeleton h-4 w-48 rounded"></div>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-bg-secondary rounded-xl border border-border p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="skeleton h-12 w-12 rounded-xl"></div>
+                    <div className="flex-1">
+                      <div className="skeleton h-5 w-24 rounded mb-2"></div>
+                      <div className="skeleton h-4 w-32 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="bg-bg-secondary rounded-xl border border-border p-5">
+                <div className="flex items-start gap-4">
+                  <div className="skeleton h-12 w-12 rounded-xl"></div>
+                  <div className="flex-1">
+                    <div className="skeleton h-5 w-48 rounded mb-2"></div>
+                    <div className="skeleton h-4 w-64 rounded"></div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -57,50 +144,16 @@ export default function TopicsPage() {
             </button>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {topics.map((topic, i) => (
-              <Link
-                key={topic.name}
-                href={`/topics/${encodeURIComponent(topic.name)}`}
-                className="group bg-bg-secondary rounded-xl border border-border p-6 card-hover animate-fade-in-up"
-                style={{ animationDelay: `${i * 0.1}s` }}
-              >
-                <div className="w-14 h-14 rounded-xl bg-pink-500/10 text-pink-400 flex items-center justify-center mb-4 group-hover:bg-pink-500/20 transition-colors">
-                  {topic.continuous ? (
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                  ) : (
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                    </svg>
-                  )}
-                </div>
-                <h2 className="font-[family-name:var(--font-chakra)] text-xl font-semibold text-pink-50 mb-2 capitalize">
-                  {topic.name.replace(/-/g, " ")}
-                </h2>
-                <div className="flex items-center gap-2 text-text-tertiary text-sm">
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                    topic.continuous
-                      ? "bg-bullish/10 text-bullish"
-                      : "bg-pink-500/10 text-pink-400"
-                  }`}>
-                    {topic.continuous ? "Continuous" : "Event-based"}
-                  </span>
-                  {topic.subtopic_count && topic.subtopic_count > 0 && (
-                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400">
-                      {topic.subtopic_count} subtopic{topic.subtopic_count !== 1 ? 's' : ''}
-                    </span>
-                  )}
-                </div>
-                <div className="mt-4 flex items-center text-pink-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                  View Markets
-                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </Link>
-            ))}
+          <div className="space-y-4">
+            {/* Top row: BTC, ETH, SOL side by side */}
+            {cryptoTopics.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {cryptoTopics.map((topic, i) => renderTopicCard(topic, i, true))}
+              </div>
+            )}
+
+            {/* Remaining topics in a single column list */}
+            {remainingTopics.map((topic, i) => renderTopicCard(topic, i + cryptoTopics.length))}
           </div>
         )}
 

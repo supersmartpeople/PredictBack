@@ -203,6 +203,10 @@ class Topic(BaseModel):
     created_at: datetime
     subtopic: Optional[str] = None
     subtopic_count: Optional[int] = None
+    icon_url: Optional[str] = None
+    date_range: Optional[str] = None
+    sort_order: Optional[int] = None
+    negrisk: Optional[bool] = None
 
 
 class SubtopicInfo(BaseModel):

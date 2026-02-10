@@ -21,7 +21,7 @@ function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
   if (segments[0] === "topics") {
     breadcrumbs.push({ label: "Topics", href: "/topics" });
     if (segments[1]) {
-      const topicName = decodeURIComponent(segments[1]).replace(/-/g, " ");
+      const topicName = decodeURIComponent(segments[1]);
       breadcrumbs.push({ label: topicName });
     }
   } else if (segments[0] === "backtest") {
@@ -85,12 +85,12 @@ export function GlobalNavbar() {
                 {crumb.href ? (
                   <Link
                     href={crumb.href}
-                    className="text-text-secondary hover:text-pink-400 transition-colors capitalize"
+                    className="text-text-secondary hover:text-pink-400 transition-colors"
                   >
                     {crumb.label}
                   </Link>
                 ) : (
-                  <span className="text-pink-400 font-medium capitalize">
+                  <span className="text-pink-400 font-medium">
                     {crumb.label}
                   </span>
                 )}

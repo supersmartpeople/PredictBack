@@ -138,8 +138,8 @@ export default function MarketsPage() {
               </svg>
               Back to Topics
             </Link>
-            <h1 className="font-[family-name:var(--font-chakra)] text-3xl md:text-4xl font-bold text-pink-50 mb-3 capitalize">
-              {topic.replace(/-/g, " ")} - Select Group
+            <h1 className="font-[family-name:var(--font-chakra)] text-3xl md:text-4xl font-bold text-pink-50 mb-3">
+              {topic} - Select Group
             </h1>
             <p className="text-text-secondary text-lg">
               Choose a market condition group
@@ -198,7 +198,7 @@ export default function MarketsPage() {
           href: "/topics",
           label: "Back to Topics",
         }}
-        title={topic.replace(/-/g, " ")}
+        title={topic}
         subtitle="Continuous Market - Backtest across multiple sequential markets"
       />
     );
@@ -218,8 +218,8 @@ export default function MarketsPage() {
             </svg>
             Back to Topics
           </Link>
-          <h1 className="font-[family-name:var(--font-chakra)] text-3xl md:text-4xl font-bold text-pink-50 mb-3 capitalize">
-            {topic.replace(/-/g, " ")}
+          <h1 className="font-[family-name:var(--font-chakra)] text-3xl md:text-4xl font-bold text-pink-50 mb-3">
+            {topic}
           </h1>
           <p className="text-text-secondary text-lg">
             Select a market to run backtests

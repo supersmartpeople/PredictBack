@@ -125,8 +125,8 @@ export default function SubtopicPage() {
               </svg>
               Back to Groups
             </Link>
-            <h1 className="font-[family-name:var(--font-chakra)] text-3xl md:text-4xl font-bold text-pink-50 mb-3 capitalize">
-              {topic.replace(/-/g, " ")} - {subtopic}
+            <h1 className="font-[family-name:var(--font-chakra)] text-3xl md:text-4xl font-bold text-pink-50 mb-3">
+              {topic} - {subtopic}
             </h1>
             <p className="text-text-secondary text-lg">
               Select a period to run backtest
@@ -177,7 +177,7 @@ export default function SubtopicPage() {
           href: `/topics/${encodeURIComponent(topic)}`,
           label: "Back to Subtopics",
         }}
-        title={`${topic.replace(/-/g, " ")} - ${subtopic}`}
+        title={`${topic} - ${subtopic}`}
         subtitle="Continuous Market - Backtest across multiple sequential markets"
       />
     );
@@ -197,8 +197,8 @@ export default function SubtopicPage() {
             </svg>
             Back to Subtopics
           </Link>
-          <h1 className="font-[family-name:var(--font-chakra)] text-3xl md:text-4xl font-bold text-pink-50 mb-3 capitalize">
-            {topic.replace(/-/g, " ")} - {subtopic}
+          <h1 className="font-[family-name:var(--font-chakra)] text-3xl md:text-4xl font-bold text-pink-50 mb-3">
+            {topic} - {subtopic}
           </h1>
           <p className="text-text-secondary text-lg">
             Select a market to run backtests

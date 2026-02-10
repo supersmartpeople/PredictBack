@@ -25,6 +25,10 @@ export interface Topic {
   created_at: string;
   subtopic?: string | null;
   subtopic_count?: number;
+  icon_url?: string | null;
+  date_range?: string | null;
+  sort_order?: number | null;
+  negrisk?: boolean | null;
 }
 
 export interface SubtopicInfo {
