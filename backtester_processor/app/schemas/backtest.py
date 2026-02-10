@@ -6,7 +6,7 @@ from decimal import Decimal
 from datetime import datetime
 from typing import Literal, Optional, Union, Any, Annotated
 
-from pydantic import BaseModel, Field, model_validator, field_validator
+from pydantic import BaseModel, Field, model_validator, field_validator, ConfigDict
 
 
 # Strategy Configuration Models
@@ -195,12 +195,14 @@ class ErrorResponse(BaseModel):
 # Topic Models
 class Topic(BaseModel):
     """Topic/category model."""
+    model_config = ConfigDict(exclude_none=True)
+
     id: Optional[int] = None
     name: str
     continuous: bool
     created_at: datetime
     subtopic: Optional[str] = None
-    subtopic_count: Optional[int] = 0
+    subtopic_count: Optional[int] = None
 
 
 class SubtopicInfo(BaseModel):

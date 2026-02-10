@@ -18,13 +18,14 @@ def get_repository() -> PolymarketRepository:
     return PolymarketRepository(settings.database_url)
 
 
-@router.get("/", response_model=TopicsResponse)
+@router.get("/", response_model=TopicsResponse, response_model_exclude_none=True)
 async def get_topics() -> TopicsResponse:
     """
     Get all available topics/categories.
 
     Returns a list of all topics that can be used to filter markets.
     Topics are grouped by name with subtopic count.
+    Only includes topics with at least one market.
     """
     repo = get_repository()
     topics_data = repo.get_topics()
@@ -34,7 +35,8 @@ async def get_topics() -> TopicsResponse:
             name=t["name"],
             continuous=t["continuous"],
             created_at=t["created_at"],
-            subtopic_count=t.get("subtopic_count", 0),
+            # Only show subtopic_count if it's greater than 0, otherwise set to None
+            subtopic_count=t.get("subtopic_count", 0) if t.get("subtopic_count", 0) > 0 else None,
         )
         for t in topics_data
     ]

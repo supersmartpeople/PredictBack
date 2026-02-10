@@ -253,7 +253,7 @@ class PolymarketRepository:
 
     def get_subtopics_for_topic(self, name: str) -> list[dict]:
         """
-        Get all subtopics for a given topic name.
+        Get all subtopics for a given topic name that have at least one market.
 
         Args:
             name: Topic name
@@ -265,10 +265,13 @@ class PolymarketRepository:
             with conn.cursor() as cur:
                 cur.execute(
                     """
-                    SELECT id, name, subtopic, continuous, created_at
-                    FROM topics
-                    WHERE name = %s AND subtopic IS NOT NULL
-                    ORDER BY subtopic
+                    SELECT t.id, t.name, t.subtopic, t.continuous, t.created_at
+                    FROM topics t
+                    WHERE t.name = %s AND t.subtopic IS NOT NULL
+                    AND EXISTS (
+                        SELECT 1 FROM hist_markets m WHERE m.topic_id = t.id
+                    )
+                    ORDER BY t.subtopic
                     """,
                     (name,)
                 )
@@ -279,22 +282,42 @@ class PolymarketRepository:
         """
         Get all topics grouped by name.
         Returns distinct topic names with subtopic count.
+        Only includes topics that have at least one market.
         """
         with self.get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(
                     """
+                    WITH topic_market_counts AS (
+                        SELECT
+                            t.name,
+                            t.subtopic,
+                            t.continuous,
+                            t.created_at,
+                            COUNT(m.clob_token_id) as market_count
+                        FROM topics t
+                        LEFT JOIN hist_markets m ON t.id = m.topic_id
+                        GROUP BY t.name, t.subtopic, t.continuous, t.created_at
+                    )
                     SELECT DISTINCT ON (name)
                            name,
                            bool_or(continuous) OVER (PARTITION BY name) as continuous,
                            MIN(created_at) OVER (PARTITION BY name) as created_at,
-                           COUNT(*) FILTER (WHERE subtopic IS NOT NULL) OVER (PARTITION BY name) as subtopic_count
-                    FROM topics
+                           COUNT(*) FILTER (WHERE subtopic IS NOT NULL AND market_count > 0) OVER (PARTITION BY name) as subtopic_count,
+                           SUM(market_count) OVER (PARTITION BY name) as total_markets
+                    FROM topic_market_counts
+                    WHERE market_count > 0 OR name IN (
+                        SELECT DISTINCT name
+                        FROM topic_market_counts
+                        WHERE market_count > 0
+                    )
                     ORDER BY name, created_at
                     """
                 )
                 columns = [desc[0] for desc in cur.description]
-                return [dict(zip(columns, row)) for row in cur.fetchall()]
+                results = [dict(zip(columns, row)) for row in cur.fetchall()]
+                # Filter to only include topics that have at least one market
+                return [r for r in results if r['total_markets'] > 0]
 
     def get_topic_info(self, name: str, subtopic: Optional[str] = None) -> Optional[dict]:
         """
