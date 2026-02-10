@@ -16,6 +16,18 @@ export default function LandingPage() {
         {/* Grid Pattern Overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f0a_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f0a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
       </div>
+      {/* Built by SuperSmartPeople */}
+      <div className="fixed top-[18px] left-1/2 -translate-x-1/2 z-50">
+        <a
+          href="https://supersmartpeople.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[11px] text-text-tertiary/40 hover:text-text-tertiary/70 transition-colors tracking-wide"
+        >
+          built by superSmartPeople
+        </a>
+      </div>
+
       {/* Hero Section */}
       <section className="pt-16 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
