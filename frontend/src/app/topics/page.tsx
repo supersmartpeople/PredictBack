@@ -31,7 +31,7 @@ export default function TopicsPage() {
     <Link
       key={topic.name}
       href={`/topics/${encodeURIComponent(topic.name)}`}
-      className="group relative bg-bg-secondary rounded-x0 border border-border p-5 card-hover animate-fade-in-up"
+      className=""
       style={{ animationDelay: `${i * 0.05}s` }}
     >
       <div className="flex items-start gap-4">
