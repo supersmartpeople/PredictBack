@@ -31,7 +31,7 @@ export default function TopicsPage() {
     <Link
       key={topic.name}
       href={`/topics/${encodeURIComponent(topic.name)}`}
-      className=""
+      className="block bg-bg-secondary/50 rounded-2xl border border-pink-500/10 p-5 transition-all duration-200 hover:bg-pink-500/10 hover:border-pink-500/30 hover:shadow-[0_0_20px_rgba(236,72,153,0.15)] group"
       style={{ animationDelay: `${i * 0.05}s` }}
     >
       <div className="flex items-start gap-4">
