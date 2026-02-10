@@ -32,18 +32,18 @@ export default function TopicsPage() {
     <Link
       key={topic.name}
       href={`/topics/${encodeURIComponent(topic.name)}`}
-      className="group bg-bg-secondary rounded-xl border border-border p-5 card-hover animate-fade-in-up"
+      className="group relative bg-bg-secondary rounded-xl border border-border p-5 card-hover animate-fade-in-up overflow-hidden"
       style={{ animationDelay: `${i * 0.05}s` }}
     >
       <div className="flex items-start gap-4">
-        <div className="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-pink-500/20 transition-colors overflow-hidden">
+        <div className="relative w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-pink-500/20 transition-colors overflow-hidden">
           {topic.icon_url ? (
             <Image
               src={topic.icon_url}
               alt={topic.name}
-              width={48}
-              height={48}
-              className="w-full h-full object-cover rounded-xl"
+              fill
+              sizes="48px"
+              className="object-cover"
               unoptimized
             />
           ) : topic.continuous ? (
