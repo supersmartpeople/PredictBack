@@ -31,7 +31,7 @@ export default function TopicsPage() {
     <Link
       key={topic.name}
       href={`/topics/${encodeURIComponent(topic.name)}`}
-      className="group relative bg-bg-secondary rounded-xl border border-border p-5 card-hover animate-fade-in-up"
+      className="group relative overflow-hidden bg-bg-secondary rounded-xl border border-border p-5 card-hover animate-fade-in-up"
       style={{ animationDelay: `${i * 0.05}s` }}
     >
       <div className="flex items-start gap-4">
@@ -113,7 +113,6 @@ export default function TopicsPage() {
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="bg-bg-secondary rounded-xl border border-border p-5">
                 <div className="flex items-start gap-4">
-                  <div className="skeleton h-12 w-12 rounded-xl"></div>
                   <div className="flex-1">
                     <div className="skeleton h-5 w-48 rounded mb-2"></div>
                     <div className="skeleton h-4 w-64 rounded"></div>
