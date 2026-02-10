@@ -35,7 +35,7 @@ export default function TopicsPage() {
       style={{ animationDelay: `${i * 0.05}s` }}
     >
       <div className="flex items-start gap-4">
-        {topic.continuous && topic.icon_url && (
+        {topic.icon_url && topic.continuous && (
           <div
             className="w-12 h-12 rounded-xl flex-shrink-0"
             style={{
@@ -112,9 +112,12 @@ export default function TopicsPage() {
             </div>
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="bg-bg-secondary rounded-xl border border-border p-5">
-                <div className="flex-1">
-                  <div className="skeleton h-5 w-48 rounded mb-2"></div>
-                  <div className="skeleton h-4 w-64 rounded"></div>
+                <div className="flex items-start gap-4">
+                  <div className="skeleton h-12 w-12 rounded-xl"></div>
+                  <div className="flex-1">
+                    <div className="skeleton h-5 w-48 rounded mb-2"></div>
+                    <div className="skeleton h-4 w-64 rounded"></div>
+                  </div>
                 </div>
               </div>
             ))}
