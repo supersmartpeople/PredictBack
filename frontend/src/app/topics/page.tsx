@@ -35,28 +35,16 @@ export default function TopicsPage() {
       style={{ animationDelay: `${i * 0.05}s` }}
     >
       <div className="flex items-start gap-4">
-        <div
-          className={`w-12 h-12 rounded-xl flex-shrink-0 transition-colors ${
-            topic.icon_url
-              ? ""
-              : "bg-pink-500/10 group-hover:bg-pink-500/20 flex items-center justify-center"
-          }`}
-          style={topic.icon_url ? {
-            backgroundImage: `url(${topic.icon_url})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          } : undefined}
-        >
-          {!topic.icon_url && (topic.continuous ? (
-            <svg className="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-            </svg>
-          ) : (
-            <svg className="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            </svg>
-          ))}
-        </div>
+        {topic.continuous && topic.icon_url && (
+          <div
+            className="w-12 h-12 rounded-xl flex-shrink-0"
+            style={{
+              backgroundImage: `url(${topic.icon_url})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+        )}
         <div className="flex-1 min-w-0">
           <h2 className="font-[family-name:var(--font-chakra)] text-lg font-semibold text-pink-50 mb-1">
             {topic.name}
@@ -124,12 +112,9 @@ export default function TopicsPage() {
             </div>
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="bg-bg-secondary rounded-xl border border-border p-5">
-                <div className="flex items-start gap-4">
-                  <div className="skeleton h-12 w-12 rounded-xl"></div>
-                  <div className="flex-1">
-                    <div className="skeleton h-5 w-48 rounded mb-2"></div>
-                    <div className="skeleton h-4 w-64 rounded"></div>
-                  </div>
+                <div className="flex-1">
+                  <div className="skeleton h-5 w-48 rounded mb-2"></div>
+                  <div className="skeleton h-4 w-64 rounded"></div>
                 </div>
               </div>
             ))}
