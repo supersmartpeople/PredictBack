@@ -1,4 +1,4 @@
 # Replace with your actual domain
-api.yourdomain.com {
+api.predictback.com {
     reverse_proxy backend:8000
 }
