@@ -16,18 +16,6 @@ export default function LandingPage() {
         {/* Grid Pattern Overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f0a_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f0a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
       </div>
-      {/* Built by SuperSmartPeople */}
-      <div className="fixed top-[18px] left-1/2 -translate-x-1/2 z-50">
-        <a
-          href="https://supersmartpeople.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[11px] text-text-tertiary/40 hover:text-text-tertiary/70 transition-colors tracking-wide"
-        >
-          built by superSmartPeople
-        </a>
-      </div>
-
       {/* Hero Section */}
       <section className="pt-16 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
@@ -54,6 +42,18 @@ export default function LandingPage() {
               Test your trading strategies with historical data from prediction markets.
               Analyze performance, optimize parameters, and trade with confidence.
             </p>
+
+            {/* Built by SuperSmartPeople */}
+            <div className="mb-10 animate-fade-in-up stagger-2">
+              <a
+                href="https://supersmartpeople.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-text-tertiary/50 hover:text-pink-400/80 transition-all duration-300 tracking-widest uppercase hover:drop-shadow-[0_0_8px_rgba(255,71,133,0.4)]"
+              >
+                built by <span className="font-semibold text-text-tertiary/70 hover:text-pink-400 drop-shadow-[0_0_6px_rgba(255,71,133,0.15)]">superSmartPeople</span>
+              </a>
+            </div>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up stagger-3">
