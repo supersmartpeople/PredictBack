@@ -298,6 +298,23 @@ body {
   animation: shimmer 1.5s infinite;
 }
 
+/* Sparkle dots around nav link */
+@keyframes sparkle-orbit {
+  0%   { transform: translate(0, 0) scale(1);   opacity: 0.9; }
+  25%  { transform: translate(2px, -4px) scale(1.3); opacity: 1;   }
+  50%  { transform: translate(-2px, -6px) scale(0.7); opacity: 0.6; }
+  75%  { transform: translate(3px, -3px) scale(1.2); opacity: 1;   }
+  100% { transform: translate(0, 0) scale(1);   opacity: 0.9; }
+}
+.link-sparkle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--pink-300) 0%, var(--pink-500) 100%);
+  box-shadow: 0 0 4px rgba(255, 71, 133, 0.9);
+  animation: sparkle-orbit ease-in-out infinite;
+  pointer-events: none;
+}
+
 /* Nav bar particles (data-analysis page) */
 @keyframes nav-particle-rise {
   0%   { transform: translateY(0) scale(1); opacity: 0; }

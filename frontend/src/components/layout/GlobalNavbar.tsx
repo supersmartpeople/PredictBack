@@ -155,12 +155,36 @@ export function GlobalNavbar() {
                 >
                   How It Works
                 </a>
-                <Link
-                  href="/data-analysis"
-                  className="text-sm text-text-secondary hover:text-pink-400 transition-colors"
-                >
-                  Data Analysis
-                </Link>
+                <div className="relative inline-flex items-center">
+                  {/* Sparkle particles */}
+                  {[
+                    { top: -6,  left: 4,   size: 2.5, delay: 0    },
+                    { top: -5,  left: 40,  size: 2,   delay: 0.6  },
+                    { top: -4,  left: 72,  size: 2.5, delay: 1.2  },
+                    { top:  4,  left: -4,  size: 2,   delay: 0.3  },
+                    { top:  14, left: 20,  size: 2,   delay: 0.9  },
+                    { top:  13, left: 60,  size: 2.5, delay: 1.5  },
+                  ].map((s, i) => (
+                    <span
+                      key={i}
+                      className="link-sparkle"
+                      style={{
+                        top: s.top,
+                        left: s.left,
+                        width: s.size,
+                        height: s.size,
+                        animationDelay: `${s.delay}s`,
+                        animationDuration: "2.2s",
+                      }}
+                    />
+                  ))}
+                  <Link
+                    href="/data-analysis"
+                    className="text-sm text-pink-400 hover:text-pink-300 transition-colors font-medium"
+                  >
+                    Data Analysis
+                  </Link>
+                </div>
                 <a
                   href="https://predictback.gitbook.io/predictback-docs"
                   target="_blank"
