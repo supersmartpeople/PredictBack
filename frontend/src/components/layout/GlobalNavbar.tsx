@@ -34,9 +34,25 @@ function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
   return breadcrumbs;
 }
 
+const NAV_PARTICLES = [
+  { left: "4%",  size: 3, delay: 0,   dur: 3.2, bottom: 2  },
+  { left: "11%", size: 2, delay: 1.0, dur: 2.6, bottom: 6  },
+  { left: "19%", size: 4, delay: 0.4, dur: 3.8, bottom: 0  },
+  { left: "28%", size: 2, delay: 2.0, dur: 3.0, bottom: 8  },
+  { left: "37%", size: 3, delay: 0.7, dur: 4.1, bottom: 3  },
+  { left: "47%", size: 2, delay: 1.6, dur: 2.9, bottom: 5  },
+  { left: "57%", size: 4, delay: 0.2, dur: 3.5, bottom: 1  },
+  { left: "66%", size: 2, delay: 2.4, dur: 2.7, bottom: 7  },
+  { left: "75%", size: 3, delay: 1.2, dur: 3.9, bottom: 2  },
+  { left: "84%", size: 2, delay: 0.9, dur: 3.3, bottom: 4  },
+  { left: "92%", size: 3, delay: 1.8, dur: 2.8, bottom: 0  },
+  { left: "50%", size: 2, delay: 3.0, dur: 4.0, bottom: 9  },
+];
+
 export function GlobalNavbar() {
   const pathname = usePathname();
   const isLandingPage = pathname === "/";
+  const isDataAnalysis = pathname === "/data-analysis";
   const breadcrumbs = generateBreadcrumbs(pathname);
 
   return (
@@ -47,6 +63,26 @@ export function GlobalNavbar() {
           : "bg-bg-secondary/95 backdrop-blur-xl"
       } border-b border-border`}
     >
+      {/* Particles — always visible on data-analysis */}
+      {isDataAnalysis && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {NAV_PARTICLES.map((p, i) => (
+            <div
+              key={i}
+              className="nav-particle"
+              style={{
+                left: p.left,
+                bottom: p.bottom,
+                width: p.size,
+                height: p.size,
+                animationDelay: `${p.delay}s`,
+                animationDuration: `${p.dur}s`,
+                opacity: 0,
+              }}
+            />
+          ))}
+        </div>
+      )}
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Left: Logo + Brand */}
         <Link href="/" className="flex items-center gap-3 group">

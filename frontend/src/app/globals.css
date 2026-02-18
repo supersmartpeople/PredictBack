@@ -298,6 +298,22 @@ body {
   animation: shimmer 1.5s infinite;
 }
 
+/* Nav bar particles (data-analysis page) */
+@keyframes nav-particle-rise {
+  0%   { transform: translateY(0) scale(1); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 0.8; }
+  100% { transform: translateY(-72px) scale(0.4); opacity: 0; }
+}
+.nav-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--pink-400) 0%, var(--pink-600) 100%);
+  box-shadow: 0 0 5px rgba(255, 71, 133, 0.7);
+  animation: nav-particle-rise linear infinite;
+  pointer-events: none;
+}
+
 /* Pink particle float */
 @keyframes particle-rise {
   0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
