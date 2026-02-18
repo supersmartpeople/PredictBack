@@ -1,0 +1,614 @@
+{
+  "type": "line",
+  "data": [
+    {
+      "price": 1,
+      "Taker": -0.57,
+      "Maker": 0.57,
+      "Combined": -0.09
+    },
+    {
+      "price": 2,
+      "Taker": -0.84,
+      "Maker": 0.56,
+      "Combined": -0.1
+    },
+    {
+      "price": 3,
+      "Taker": -1.23,
+      "Maker": 0.72,
+      "Combined": -0.29
+    },
+    {
+      "price": 4,
+      "Taker": -1.52,
+      "Maker": 0.54,
+      "Combined": -0.55
+    },
+    {
+      "price": 5,
+      "Taker": -1.55,
+      "Maker": -0.0,
+      "Combined": -0.82
+    },
+    {
+      "price": 6,
+      "Taker": -2.06,
+      "Maker": 0.02,
+      "Combined": -1.08
+    },
+    {
+      "price": 7,
+      "Taker": -2.28,
+      "Maker": 0.07,
+      "Combined": -1.21
+    },
+    {
+      "price": 8,
+      "Taker": -2.03,
+      "Maker": 0.21,
+      "Combined": -1.03
+    },
+    {
+      "price": 9,
+      "Taker": -2.25,
+      "Maker": 0.11,
+      "Combined": -1.22
+    },
+    {
+      "price": 10,
+      "Taker": -2.18,
+      "Maker": 0.2,
+      "Combined": -1.09
+    },
+    {
+      "price": 11,
+      "Taker": -2.27,
+      "Maker": 0.26,
+      "Combined": -1.07
+    },
+    {
+      "price": 12,
+      "Taker": -2.08,
+      "Maker": 0.38,
+      "Combined": -0.89
+    },
+    {
+      "price": 13,
+      "Taker": -1.21,
+      "Maker": 0.06,
+      "Combined": -0.63
+    },
+    {
+      "price": 14,
+      "Taker": -1.42,
+      "Maker": -0.62,
+      "Combined": -1.05
+    },
+    {
+      "price": 15,
+      "Taker": -2.22,
+      "Maker": 0.23,
+      "Combined": -1.08
+    },
+    {
+      "price": 16,
+      "Taker": -1.73,
+      "Maker": 0.34,
+      "Combined": -0.74
+    },
+    {
+      "price": 17,
+      "Taker": -1.68,
+      "Maker": -0.51,
+      "Combined": -1.16
+    },
+    {
+      "price": 18,
+      "Taker": -2.3,
+      "Maker": 0.05,
+      "Combined": -1.23
+    },
+    {
+      "price": 19,
+      "Taker": -2.13,
+      "Maker": -0.08,
+      "Combined": -1.19
+    },
+    {
+      "price": 20,
+      "Taker": -1.16,
+      "Maker": 2.85,
+      "Combined": 0.81
+    },
+    {
+      "price": 21,
+      "Taker": 0.3,
+      "Maker": 3.17,
+      "Combined": 1.7
+    },
+    {
+      "price": 22,
+      "Taker": 1.59,
+      "Maker": -0.27,
+      "Combined": 0.73
+    },
+    {
+      "price": 23,
+      "Taker": -1.73,
+      "Maker": -1.38,
+      "Combined": -1.57
+    },
+    {
+      "price": 24,
+      "Taker": -2.56,
+      "Maker": -1.78,
+      "Combined": -2.2
+    },
+    {
+      "price": 25,
+      "Taker": -2.54,
+      "Maker": -1.2,
+      "Combined": -1.89
+    },
+    {
+      "price": 26,
+      "Taker": -3.11,
+      "Maker": -0.62,
+      "Combined": -1.89
+    },
+    {
+      "price": 27,
+      "Taker": -2.81,
+      "Maker": 0.4,
+      "Combined": -1.29
+    },
+    {
+      "price": 28,
+      "Taker": -1.37,
+      "Maker": 3.58,
+      "Combined": 0.91
+    },
+    {
+      "price": 29,
+      "Taker": -0.45,
+      "Maker": 0.61,
+      "Combined": 0.03
+    },
+    {
+      "price": 30,
+      "Taker": -1.27,
+      "Maker": 1.14,
+      "Combined": -0.11
+    },
+    {
+      "price": 31,
+      "Taker": -2.71,
+      "Maker": 3.82,
+      "Combined": 0.44
+    },
+    {
+      "price": 32,
+      "Taker": 1.93,
+      "Maker": 2.86,
+      "Combined": 2.38
+    },
+    {
+      "price": 33,
+      "Taker": 0.94,
+      "Maker": 2.7,
+      "Combined": 1.78
+    },
+    {
+      "price": 34,
+      "Taker": 1.23,
+      "Maker": 3.2,
+      "Combined": 2.16
+    },
+    {
+      "price": 35,
+      "Taker": -0.1,
+      "Maker": 0.25,
+      "Combined": 0.08
+    },
+    {
+      "price": 36,
+      "Taker": -0.3,
+      "Maker": -0.28,
+      "Combined": -0.29
+    },
+    {
+      "price": 37,
+      "Taker": -0.22,
+      "Maker": 2.2,
+      "Combined": 0.96
+    },
+    {
+      "price": 38,
+      "Taker": -2.04,
+      "Maker": 3.5,
+      "Combined": 0.69
+    },
+    {
+      "price": 39,
+      "Taker": -1.88,
+      "Maker": 1.51,
+      "Combined": -0.31
+    },
+    {
+      "price": 40,
+      "Taker": -1.55,
+      "Maker": 1.66,
+      "Combined": 0.04
+    },
+    {
+      "price": 41,
+      "Taker": -1.66,
+      "Maker": 0.81,
+      "Combined": -0.34
+    },
+    {
+      "price": 42,
+      "Taker": -2.84,
+      "Maker": -1.05,
+      "Combined": -1.88
+    },
+    {
+      "price": 43,
+      "Taker": -3.41,
+      "Maker": -0.95,
+      "Combined": -2.18
+    },
+    {
+      "price": 44,
+      "Taker": -3.73,
+      "Maker": 1.02,
+      "Combined": -1.42
+    },
+    {
+      "price": 45,
+      "Taker": -2.24,
+      "Maker": 0.32,
+      "Combined": -0.94
+    },
+    {
+      "price": 46,
+      "Taker": -0.84,
+      "Maker": 1.04,
+      "Combined": 0.11
+    },
+    {
+      "price": 47,
+      "Taker": -2.48,
+      "Maker": -0.98,
+      "Combined": -1.71
+    },
+    {
+      "price": 48,
+      "Taker": -2.42,
+      "Maker": -0.57,
+      "Combined": -1.53
+    },
+    {
+      "price": 49,
+      "Taker": -2.81,
+      "Maker": 0.66,
+      "Combined": -1.1
+    },
+    {
+      "price": 50,
+      "Taker": -1.32,
+      "Maker": 1.33,
+      "Combined": 0.0
+    },
+    {
+      "price": 51,
+      "Taker": -0.66,
+      "Maker": 2.81,
+      "Combined": 1.1
+    },
+    {
+      "price": 52,
+      "Taker": 0.57,
+      "Maker": 2.41,
+      "Combined": 1.53
+    },
+    {
+      "price": 53,
+      "Taker": 0.97,
+      "Maker": 2.48,
+      "Combined": 1.72
+    },
+    {
+      "price": 54,
+      "Taker": -1.04,
+      "Maker": 0.84,
+      "Combined": -0.11
+    },
+    {
+      "price": 55,
+      "Taker": -0.32,
+      "Maker": 2.24,
+      "Combined": 0.95
+    },
+    {
+      "price": 56,
+      "Taker": -1.02,
+      "Maker": 3.73,
+      "Combined": 1.43
+    },
+    {
+      "price": 57,
+      "Taker": 0.95,
+      "Maker": 3.4,
+      "Combined": 2.18
+    },
+    {
+      "price": 58,
+      "Taker": 1.05,
+      "Maker": 2.84,
+      "Combined": 1.88
+    },
+    {
+      "price": 59,
+      "Taker": -0.81,
+      "Maker": 1.66,
+      "Combined": 0.34
+    },
+    {
+      "price": 60,
+      "Taker": -1.66,
+      "Maker": 1.55,
+      "Combined": -0.04
+    },
+    {
+      "price": 61,
+      "Taker": -1.52,
+      "Maker": 1.89,
+      "Combined": 0.31
+    },
+    {
+      "price": 62,
+      "Taker": -3.49,
+      "Maker": 2.05,
+      "Combined": -0.68
+    },
+    {
+      "price": 63,
+      "Taker": -2.2,
+      "Maker": 0.21,
+      "Combined": -0.97
+    },
+    {
+      "price": 64,
+      "Taker": 0.28,
+      "Maker": 0.3,
+      "Combined": 0.29
+    },
+    {
+      "price": 65,
+      "Taker": -0.25,
+      "Maker": 0.1,
+      "Combined": -0.08
+    },
+    {
+      "price": 66,
+      "Taker": -3.2,
+      "Maker": -1.23,
+      "Combined": -2.16
+    },
+    {
+      "price": 67,
+      "Taker": -2.7,
+      "Maker": -0.94,
+      "Combined": -1.78
+    },
+    {
+      "price": 68,
+      "Taker": -2.86,
+      "Maker": -1.92,
+      "Combined": -2.37
+    },
+    {
+      "price": 69,
+      "Taker": -3.82,
+      "Maker": 2.7,
+      "Combined": -0.44
+    },
+    {
+      "price": 70,
+      "Taker": -1.14,
+      "Maker": 1.27,
+      "Combined": 0.11
+    },
+    {
+      "price": 71,
+      "Taker": -0.62,
+      "Maker": 0.47,
+      "Combined": -0.03
+    },
+    {
+      "price": 72,
+      "Taker": -3.57,
+      "Maker": 1.37,
+      "Combined": -0.91
+    },
+    {
+      "price": 73,
+      "Taker": -0.4,
+      "Maker": 2.8,
+      "Combined": 1.28
+    },
+    {
+      "price": 74,
+      "Taker": 0.62,
+      "Maker": 3.12,
+      "Combined": 1.89
+    },
+    {
+      "price": 75,
+      "Taker": 1.2,
+      "Maker": 2.55,
+      "Combined": 1.89
+    },
+    {
+      "price": 76,
+      "Taker": 1.78,
+      "Maker": 2.58,
+      "Combined": 2.21
+    },
+    {
+      "price": 77,
+      "Taker": 1.38,
+      "Maker": 1.73,
+      "Combined": 1.57
+    },
+    {
+      "price": 78,
+      "Taker": 0.27,
+      "Maker": -1.6,
+      "Combined": -0.73
+    },
+    {
+      "price": 79,
+      "Taker": -3.17,
+      "Maker": -0.29,
+      "Combined": -1.69
+    },
+    {
+      "price": 80,
+      "Taker": -2.85,
+      "Maker": 1.15,
+      "Combined": -0.81
+    },
+    {
+      "price": 81,
+      "Taker": 0.08,
+      "Maker": 2.14,
+      "Combined": 1.2
+    },
+    {
+      "price": 82,
+      "Taker": -0.05,
+      "Maker": 2.31,
+      "Combined": 1.23
+    },
+    {
+      "price": 83,
+      "Taker": 0.51,
+      "Maker": 1.68,
+      "Combined": 1.16
+    },
+    {
+      "price": 84,
+      "Taker": -0.34,
+      "Maker": 1.73,
+      "Combined": 0.74
+    },
+    {
+      "price": 85,
+      "Taker": -0.23,
+      "Maker": 2.23,
+      "Combined": 1.08
+    },
+    {
+      "price": 86,
+      "Taker": 0.62,
+      "Maker": 1.41,
+      "Combined": 1.05
+    },
+    {
+      "price": 87,
+      "Taker": -0.06,
+      "Maker": 1.22,
+      "Combined": 0.63
+    },
+    {
+      "price": 88,
+      "Taker": -0.38,
+      "Maker": 2.08,
+      "Combined": 0.9
+    },
+    {
+      "price": 89,
+      "Taker": -0.26,
+      "Maker": 2.29,
+      "Combined": 1.08
+    },
+    {
+      "price": 90,
+      "Taker": -0.2,
+      "Maker": 2.2,
+      "Combined": 1.1
+    },
+    {
+      "price": 91,
+      "Taker": -0.11,
+      "Maker": 2.26,
+      "Combined": 1.22
+    },
+    {
+      "price": 92,
+      "Taker": -0.21,
+      "Maker": 2.04,
+      "Combined": 1.03
+    },
+    {
+      "price": 93,
+      "Taker": -0.07,
+      "Maker": 2.29,
+      "Combined": 1.21
+    },
+    {
+      "price": 94,
+      "Taker": -0.02,
+      "Maker": 2.07,
+      "Combined": 1.09
+    },
+    {
+      "price": 95,
+      "Taker": 0.0,
+      "Maker": 1.56,
+      "Combined": 0.83
+    },
+    {
+      "price": 96,
+      "Taker": -0.54,
+      "Maker": 1.53,
+      "Combined": 0.56
+    },
+    {
+      "price": 97,
+      "Taker": -0.72,
+      "Maker": 1.24,
+      "Combined": 0.3
+    },
+    {
+      "price": 98,
+      "Taker": -0.56,
+      "Maker": 0.86,
+      "Combined": 0.12
+    },
+    {
+      "price": 99,
+      "Taker": -0.57,
+      "Maker": 0.58,
+      "Combined": 0.09
+    }
+  ],
+  "xKey": "price",
+  "yKeys": [
+    "Taker",
+    "Maker",
+    "Combined"
+  ],
+  "title": "Mispricing by Contract Price",
+  "yUnit": "percent",
+  "colors": {
+    "Taker": "#ef4444",
+    "Maker": "#10b981",
+    "Combined": "#6366f1"
+  },
+  "xLabel": "Contract Price (cents)",
+  "yLabel": "Mispricing (pp)"
+}

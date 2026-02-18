@@ -27,6 +27,8 @@ function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
   } else if (segments[0] === "backtest") {
     breadcrumbs.push({ label: "Topics", href: "/topics" });
     breadcrumbs.push({ label: "Backtest" });
+  } else if (segments[0] === "data-analysis") {
+    breadcrumbs.push({ label: "Data Analysis" });
   }
 
   return breadcrumbs;
@@ -117,6 +119,12 @@ export function GlobalNavbar() {
                 >
                   How It Works
                 </a>
+                <Link
+                  href="/data-analysis"
+                  className="text-sm text-text-secondary hover:text-pink-400 transition-colors"
+                >
+                  Data Analysis
+                </Link>
                 <a
                   href="https://predictback.gitbook.io/predictback-docs"
                   target="_blank"

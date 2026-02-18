@@ -1,0 +1,107 @@
+{
+  "type": "bar",
+  "data": [
+    {
+      "hour": 0,
+      "Excess Return": -1.19
+    },
+    {
+      "hour": 1,
+      "Excess Return": -0.99
+    },
+    {
+      "hour": 2,
+      "Excess Return": -1.61
+    },
+    {
+      "hour": 3,
+      "Excess Return": -1.73
+    },
+    {
+      "hour": 4,
+      "Excess Return": -2.13
+    },
+    {
+      "hour": 5,
+      "Excess Return": -1.65
+    },
+    {
+      "hour": 6,
+      "Excess Return": -1.71
+    },
+    {
+      "hour": 7,
+      "Excess Return": -1.49
+    },
+    {
+      "hour": 8,
+      "Excess Return": -0.92
+    },
+    {
+      "hour": 9,
+      "Excess Return": -0.63
+    },
+    {
+      "hour": 10,
+      "Excess Return": -0.83
+    },
+    {
+      "hour": 11,
+      "Excess Return": -0.89
+    },
+    {
+      "hour": 12,
+      "Excess Return": -0.79
+    },
+    {
+      "hour": 13,
+      "Excess Return": -0.98
+    },
+    {
+      "hour": 14,
+      "Excess Return": -1.21
+    },
+    {
+      "hour": 15,
+      "Excess Return": -0.75
+    },
+    {
+      "hour": 16,
+      "Excess Return": -0.97
+    },
+    {
+      "hour": 17,
+      "Excess Return": -1.11
+    },
+    {
+      "hour": 18,
+      "Excess Return": -1.27
+    },
+    {
+      "hour": 19,
+      "Excess Return": -0.89
+    },
+    {
+      "hour": 20,
+      "Excess Return": -1.32
+    },
+    {
+      "hour": 21,
+      "Excess Return": -1.38
+    },
+    {
+      "hour": 22,
+      "Excess Return": -1.14
+    },
+    {
+      "hour": 23,
+      "Excess Return": -1.4
+    }
+  ],
+  "xKey": "hour",
+  "yKeys": [
+    "Excess Return"
+  ],
+  "title": "Excess Return by Hour of Day (ET)",
+  "yUnit": "percent"
+}

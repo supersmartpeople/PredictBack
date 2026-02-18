@@ -1,0 +1,58 @@
+{
+  "type": "bar",
+  "data": [
+    {
+      "category": "Sports",
+      "Taker Return": -1.11,
+      "Maker Return": 1.12
+    },
+    {
+      "category": "Politics",
+      "Taker Return": -0.51,
+      "Maker Return": 0.51
+    },
+    {
+      "category": "Crypto",
+      "Taker Return": -1.34,
+      "Maker Return": 1.34
+    },
+    {
+      "category": "Finance",
+      "Taker Return": -0.08,
+      "Maker Return": 0.08
+    },
+    {
+      "category": "Weather",
+      "Taker Return": -1.29,
+      "Maker Return": 1.29
+    },
+    {
+      "category": "Entertainment",
+      "Taker Return": -2.4,
+      "Maker Return": 2.4
+    },
+    {
+      "category": "Other",
+      "Taker Return": -1.19,
+      "Maker Return": 1.19
+    },
+    {
+      "category": "Media",
+      "Taker Return": -3.64,
+      "Maker Return": 3.64
+    }
+  ],
+  "xKey": "category",
+  "yKeys": [
+    "Taker Return",
+    "Maker Return"
+  ],
+  "title": "Maker vs Taker Returns by Category",
+  "yUnit": "percent",
+  "colors": {
+    "Taker Return": "#e74c3c",
+    "Maker Return": "#2ecc71"
+  },
+  "xLabel": "Category",
+  "yLabel": "Volume-Weighted Excess Return (pp)"
+}

@@ -1,0 +1,104 @@
+{
+  "type": "line",
+  "data": [
+    {
+      "quarter": "2021 Q3",
+      "Taker Return": 3.87,
+      "Maker Return": -3.87
+    },
+    {
+      "quarter": "2021 Q4",
+      "Taker Return": 3.19,
+      "Maker Return": -3.19
+    },
+    {
+      "quarter": "2022 Q1",
+      "Taker Return": 4.13,
+      "Maker Return": -4.13
+    },
+    {
+      "quarter": "2022 Q2",
+      "Taker Return": 3.05,
+      "Maker Return": -3.05
+    },
+    {
+      "quarter": "2022 Q3",
+      "Taker Return": 1.65,
+      "Maker Return": -1.65
+    },
+    {
+      "quarter": "2022 Q4",
+      "Taker Return": 0.88,
+      "Maker Return": -0.88
+    },
+    {
+      "quarter": "2023 Q1",
+      "Taker Return": 0.92,
+      "Maker Return": -0.92
+    },
+    {
+      "quarter": "2023 Q2",
+      "Taker Return": 0.93,
+      "Maker Return": -0.93
+    },
+    {
+      "quarter": "2023 Q3",
+      "Taker Return": 1.03,
+      "Maker Return": -1.03
+    },
+    {
+      "quarter": "2023 Q4",
+      "Taker Return": -0.0,
+      "Maker Return": 0.0
+    },
+    {
+      "quarter": "2024 Q1",
+      "Taker Return": 0.29,
+      "Maker Return": -0.29
+    },
+    {
+      "quarter": "2024 Q2",
+      "Taker Return": -0.75,
+      "Maker Return": 0.75
+    },
+    {
+      "quarter": "2024 Q3",
+      "Taker Return": -0.69,
+      "Maker Return": 0.69
+    },
+    {
+      "quarter": "2024 Q4",
+      "Taker Return": -1.43,
+      "Maker Return": 1.43
+    },
+    {
+      "quarter": "2025 Q1",
+      "Taker Return": -1.16,
+      "Maker Return": 1.16
+    },
+    {
+      "quarter": "2025 Q2",
+      "Taker Return": -1.12,
+      "Maker Return": 1.12
+    },
+    {
+      "quarter": "2025 Q3",
+      "Taker Return": -1.15,
+      "Maker Return": 1.15
+    },
+    {
+      "quarter": "2025 Q4",
+      "Taker Return": -1.34,
+      "Maker Return": 1.34
+    }
+  ],
+  "xKey": "quarter",
+  "yKeys": [
+    "Taker Return",
+    "Maker Return"
+  ],
+  "title": "Maker-Taker Returns Over Time",
+  "yUnit": "percent",
+  "xLabel": "Quarter",
+  "yLabel": "Excess Return (pp)"
+}

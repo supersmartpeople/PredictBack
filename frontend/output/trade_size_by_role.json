@@ -1,0 +1,24 @@
+{
+  "type": "bar",
+  "data": [
+    {
+      "role": "Taker",
+      "Mean": 120.31,
+      "Median": 13.68
+    },
+    {
+      "role": "Maker",
+      "Mean": 133.95,
+      "Median": 15.75
+    }
+  ],
+  "xKey": "role",
+  "yKeys": [
+    "Mean",
+    "Median"
+  ],
+  "title": "Trade Size Statistics by Role",
+  "yUnit": "dollars",
+  "xLabel": "Role",
+  "yLabel": "Trade Size (USD)"
+}

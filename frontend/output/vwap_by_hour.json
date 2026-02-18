@@ -1,0 +1,107 @@
+{
+  "type": "line",
+  "data": [
+    {
+      "hour": 0,
+      "VWAP": 47.5
+    },
+    {
+      "hour": 1,
+      "VWAP": 46.24
+    },
+    {
+      "hour": 2,
+      "VWAP": 46.03
+    },
+    {
+      "hour": 3,
+      "VWAP": 45.55
+    },
+    {
+      "hour": 4,
+      "VWAP": 47.63
+    },
+    {
+      "hour": 5,
+      "VWAP": 40.48
+    },
+    {
+      "hour": 6,
+      "VWAP": 46.34
+    },
+    {
+      "hour": 7,
+      "VWAP": 47.94
+    },
+    {
+      "hour": 8,
+      "VWAP": 47.97
+    },
+    {
+      "hour": 9,
+      "VWAP": 47.38
+    },
+    {
+      "hour": 10,
+      "VWAP": 47.77
+    },
+    {
+      "hour": 11,
+      "VWAP": 48.0
+    },
+    {
+      "hour": 12,
+      "VWAP": 47.3
+    },
+    {
+      "hour": 13,
+      "VWAP": 45.77
+    },
+    {
+      "hour": 14,
+      "VWAP": 46.87
+    },
+    {
+      "hour": 15,
+      "VWAP": 46.48
+    },
+    {
+      "hour": 16,
+      "VWAP": 47.72
+    },
+    {
+      "hour": 17,
+      "VWAP": 48.0
+    },
+    {
+      "hour": 18,
+      "VWAP": 46.92
+    },
+    {
+      "hour": 19,
+      "VWAP": 47.95
+    },
+    {
+      "hour": 20,
+      "VWAP": 47.46
+    },
+    {
+      "hour": 21,
+      "VWAP": 47.35
+    },
+    {
+      "hour": 22,
+      "VWAP": 47.36
+    },
+    {
+      "hour": 23,
+      "VWAP": 48.46
+    }
+  ],
+  "xKey": "hour",
+  "yKeys": [
+    "VWAP"
+  ],
+  "title": "Volume-Weighted Average Price by Hour of Day (ET)",
+  "yUnit": "cents"
+}

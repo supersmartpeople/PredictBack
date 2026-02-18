@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Prediction Market Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg-primary:#0D0E12;--bg-secondary:#161823;--bg-tertiary:#1E202E;--bg-elevated:#252836;
+  --pink-50:#FFF5F7;--pink-100:#FFE4EC;--pink-200:#FFC7D9;--pink-300:#FF9AB8;
+  --pink-400:#FF6B9D;--pink-500:#FF4785;--pink-600:#E63D75;--pink-700:#C73066;
+  --pink-800:#A02553;--pink-900:#7A1D41;
+  --green:#26A69A;--red:#EF5350;--gray:#787B86;
+  --text-primary:#E8E9ED;--text-secondary:#B2B5BE;--text-tertiary:#787B86;
+  --border:#2A2D3A;--border-pink:rgba(255,71,133,.18);
+  --font-d:'Chakra Petch',sans-serif;--font-b:'IBM Plex Sans',sans-serif;--font-m:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-b);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;top:-80px;right:-80px;width:650px;height:650px;
+  background:radial-gradient(ellipse at top right,rgba(255,71,133,.07) 0%,transparent 65%);
+  pointer-events:none;z-index:0;}
+
+/* Header */
+header{position:sticky;top:0;z-index:200;background:rgba(13,14,18,.93);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);padding:0 48px;height:60px;
+  display:flex;align-items:center;gap:14px;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--pink-500);flex-shrink:0;
+  animation:livePulse 2s cubic-bezier(.4,0,.6,1) infinite;}
+@keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(255,71,133,.5);}70%{box-shadow:0 0 0 6px rgba(255,71,133,0);}100%{box-shadow:0 0 0 0 rgba(255,71,133,0);}}
+header h1{font-family:var(--font-d);font-size:1.125rem;font-weight:700;color:var(--pink-50);letter-spacing:.4px;}
+.tagline{margin-left:auto;font-family:var(--font-m);font-size:.75rem;color:var(--text-tertiary);letter-spacing:.5px;}
+.chart-count{background:rgba(255,71,133,.12);color:var(--pink-400);padding:2px 8px;border-radius:12px;
+  font-size:.7rem;font-family:var(--font-d);font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
+
+/* Main */
+main{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:48px 48px 96px;
+  display:flex;flex-direction:column;gap:36px;}
+
+/* Card */
+.chart-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:14px;
+  padding:32px 36px 28px;transition:border-color .3s var(--ease),box-shadow .3s var(--ease);
+  animation:fadeUp .55s var(--ease) backwards;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.chart-card:hover{border-color:var(--border-pink);box-shadow:0 8px 32px rgba(255,71,133,.07);}
+
+/* Card head */
+.badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,71,133,.11);
+  color:var(--pink-400);padding:3px 10px;border-radius:20px;font-size:.6875rem;font-weight:600;
+  font-family:var(--font-d);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;}
+.card-title{font-family:var(--font-d);font-size:1.35rem;font-weight:600;color:var(--pink-50);
+  line-height:1.25;margin-bottom:4px;}
+.card-desc{font-size:.875rem;color:var(--text-tertiary);margin-bottom:18px;}
+
+/* Legend */
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
+.legend-item{display:flex;align-items:center;gap:7px;font-family:var(--font-m);
+  font-size:.78rem;color:var(--text-secondary);}
+.legend-swatch{width:22px;height:3px;border-radius:2px;}
+.legend-swatch.dashed{background:repeating-linear-gradient(90deg,var(--c,#fff) 0 6px,transparent 6px 10px);}
+
+/* Axis wrapper */
+.axis-wrapper{position:relative;padding-left:52px;}
+.y-label{position:absolute;left:0;top:50%;transform:translateY(-50%) rotate(-90deg);
+  white-space:nowrap;font-family:var(--font-m);font-size:.68rem;color:var(--text-tertiary);
+  letter-spacing:.4px;pointer-events:none;}
+.chart-box{background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;
+  padding:16px 12px 12px;position:relative;}
+.chart-box canvas{display:block;width:100%!important;height:100%!important;cursor:crosshair;}
+.x-label{text-align:center;margin-top:10px;font-family:var(--font-m);font-size:.68rem;
+  color:var(--text-tertiary);letter-spacing:.4px;}
+
+/* Responsive */
+@media(max-width:768px){
+  header{padding:0 20px;}main{padding:24px 16px 64px;}
+  .chart-card{padding:20px 16px 16px;}.axis-wrapper{padding-left:36px;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="live-dot"></div>
+  <h1>Prediction Market Analytics</h1>
+  <span class="tagline">Analysis and Data by Jonathan Becker
+  </span>
+  <span class="chart-count" id="chartCount"></span>
+</header>
+<main id="main"></main>
+
+<script>
+/* ── Data ─────────────────────────────────────────────── */
+const CHART_SPECS = [{"type":"line","data":[{"price":1,"yes_ev":-0.41,"no_ev":0.23},{"price":2,"yes_ev":-0.97,"no_ev":-0.17},{"price":3,"yes_ev":-1.05,"no_ev":-0.9},{"price":4,"yes_ev":-1.35,"no_ev":-0.25},{"price":5,"yes_ev":-1.78,"no_ev":-1.29},{"price":6,"yes_ev":-2.07,"no_ev":-1.27},{"price":7,"yes_ev":-1.97,"no_ev":-1.67},{"price":8,"yes_ev":-1.71,"no_ev":-0.91},{"price":9,"yes_ev":-1.94,"no_ev":-1.22},{"price":10,"yes_ev":-2.15,"no_ev":-1.42},{"price":11,"yes_ev":-2.98,"no_ev":-0.97},{"price":12,"yes_ev":-2.2,"no_ev":-0.29},{"price":13,"yes_ev":-1.47,"no_ev":-1.35},{"price":14,"yes_ev":-1.32,"no_ev":-1.5},{"price":15,"yes_ev":-1.99,"no_ev":-0.44},{"price":16,"yes_ev":-1.6,"no_ev":-1.38},{"price":17,"yes_ev":-1.6,"no_ev":-2.57},{"price":18,"yes_ev":-2.29,"no_ev":-1.95},{"price":19,"yes_ev":-1.53,"no_ev":-0.27},{"price":20,"yes_ev":-0.72,"no_ev":2.94},{"price":21,"yes_ev":2.3,"no_ev":3.93},{"price":22,"yes_ev":3.06,"no_ev":-1.5},{"price":23,"yes_ev":0.2,"no_ev":-3.56},{"price":24,"yes_ev":-1.99,"no_ev":-4.42},{"price":25,"yes_ev":-2.49,"no_ev":-2.76},{"price":26,"yes_ev":-2.02,"no_ev":-2.69},{"price":27,"yes_ev":-0.96,"no_ev":0.09},{"price":28,"yes_ev":0.29,"no_ev":3.99},{"price":29,"yes_ev":0.23,"no_ev":-0.13},{"price":30,"yes_ev":-0.39,"no_ev":1.06},{"price":31,"yes_ev":-1.17,"no_ev":2.91},{"price":32,"yes_ev":3.49,"no_ev":3.13},{"price":33,"yes_ev":2.78,"no_ev":3.4},{"price":34,"yes_ev":3.03,"no_ev":2.99},{"price":35,"yes_ev":-0.46,"no_ev":-0.37},{"price":36,"yes_ev":-0.62,"no_ev":-1.36},{"price":37,"yes_ev":0.46,"no_ev":0.74},{"price":38,"yes_ev":-3.04,"no_ev":0.19},{"price":39,"yes_ev":-2.04,"no_ev":-0.17},{"price":40,"yes_ev":-1.87,"no_ev":-1.4},{"price":41,"yes_ev":-2.94,"no_ev":-3.18},{"price":42,"yes_ev":-5.41,"no_ev":-5.58},{"price":43,"yes_ev":-7.55,"no_ev":-5.02},{"price":44,"yes_ev":-5.4,"no_ev":-3.07},{"price":45,"yes_ev":-3.62,"no_ev":-4.07},{"price":46,"yes_ev":-0.63,"no_ev":0.38},{"price":47,"yes_ev":-3.09,"no_ev":-1.19},{"price":48,"yes_ev":-1.72,"no_ev":-1.89},{"price":49,"yes_ev":-2.14,"no_ev":-0.31},{"price":50,"yes_ev":-1.02,"no_ev":1.03},{"price":51,"yes_ev":0.3,"no_ev":2.14},{"price":52,"yes_ev":1.89,"no_ev":1.71},{"price":53,"yes_ev":1.19,"no_ev":3.09},{"price":54,"yes_ev":-0.38,"no_ev":0.63},{"price":55,"yes_ev":4.07,"no_ev":3.6},{"price":56,"yes_ev":3.07,"no_ev":5.42},{"price":57,"yes_ev":5.02,"no_ev":7.54},{"price":58,"yes_ev":5.59,"no_ev":5.43},{"price":59,"yes_ev":3.18,"no_ev":2.94},{"price":60,"yes_ev":1.39,"no_ev":1.87},{"price":61,"yes_ev":0.16,"no_ev":2.05},{"price":62,"yes_ev":-0.18,"no_ev":3.04},{"price":63,"yes_ev":-0.74,"no_ev":-0.47},{"price":64,"yes_ev":1.36,"no_ev":0.64},{"price":65,"yes_ev":0.35,"no_ev":0.46},{"price":66,"yes_ev":-2.97,"no_ev":-3.02},{"price":67,"yes_ev":-3.4,"no_ev":-2.79},{"price":68,"yes_ev":-3.13,"no_ev":-3.47},{"price":69,"yes_ev":-2.91,"no_ev":1.15},{"price":70,"yes_ev":-1.06,"no_ev":0.42},{"price":71,"yes_ev":0.11,"no_ev":-0.23},{"price":72,"yes_ev":-3.97,"no_ev":-0.29},{"price":73,"yes_ev":-0.09,"no_ev":0.95},{"price":74,"yes_ev":2.69,"no_ev":2.03},{"price":75,"yes_ev":2.76,"no_ev":2.49},{"price":76,"yes_ev":4.42,"no_ev":2.0},{"price":77,"yes_ev":3.57,"no_ev":-0.2},{"price":78,"yes_ev":1.5,"no_ev":-3.06},{"price":79,"yes_ev":-3.93,"no_ev":-2.29},{"price":80,"yes_ev":-2.94,"no_ev":0.71},{"price":81,"yes_ev":0.27,"no_ev":1.53},{"price":82,"yes_ev":1.95,"no_ev":2.31},{"price":83,"yes_ev":2.57,"no_ev":1.59},{"price":84,"yes_ev":1.38,"no_ev":1.61},{"price":85,"yes_ev":0.44,"no_ev":1.99},{"price":86,"yes_ev":1.5,"no_ev":1.31},{"price":87,"yes_ev":1.35,"no_ev":1.49},{"price":88,"yes_ev":0.29,"no_ev":2.2},{"price":89,"yes_ev":0.96,"no_ev":2.99},{"price":90,"yes_ev":1.42,"no_ev":2.17},{"price":91,"yes_ev":1.22,"no_ev":1.94},{"price":92,"yes_ev":0.91,"no_ev":1.74},{"price":93,"yes_ev":1.67,"no_ev":1.97},{"price":94,"yes_ev":1.27,"no_ev":2.09},{"price":95,"yes_ev":1.29,"no_ev":1.78},{"price":96,"yes_ev":0.25,"no_ev":1.37},{"price":97,"yes_ev":0.9,"no_ev":1.07},{"price":98,"yes_ev":0.17,"no_ev":1.0},{"price":99,"yes_ev":-0.23,"no_ev":0.43}],"xKey":"price","yKeys":["yes_ev","no_ev"],"title":"Expected Value: YES vs NO Bets by Price","yUnit":"cents","colors":{"yes_ev":"#2ecc71","no_ev":"#e74c3c"},"xLabel":"Purchase Price (cents)","yLabel":"Expected Value (cents per contract)"},{"type":"area","data":[{"date":"2021-07-18","deviation":18.19},{"date":"2021-07-25","deviation":11.69},{"date":"2021-08-01","deviation":8.25},{"date":"2021-08-08","deviation":8.19},{"date":"2021-08-15","deviation":5.21},{"date":"2021-08-22","deviation":3.58},{"date":"2021-08-29","deviation":3.12},{"date":"2021-09-05","deviation":3.0},{"date":"2021-09-12","deviation":2.51},{"date":"2021-09-19","deviation":2.74},{"date":"2021-09-26","deviation":2.47},{"date":"2021-10-03","deviation":2.11},{"date":"2021-10-10","deviation":2.07},{"date":"2021-10-17","deviation":2.43},{"date":"2021-10-24","deviation":2.57},{"date":"2021-10-31","deviation":2.34},{"date":"2021-11-07","deviation":2.15},{"date":"2021-11-14","deviation":2.09},{"date":"2021-11-21","deviation":1.95},{"date":"2021-11-28","deviation":1.96},{"date":"2021-12-05","deviation":1.77},{"date":"2021-12-12","deviation":1.7},{"date":"2021-12-19","deviation":1.66},{"date":"2021-12-26","deviation":1.74},{"date":"2022-01-02","deviation":1.75},{"date":"2022-01-09","deviation":1.64},{"date":"2022-01-16","deviation":1.49},{"date":"2022-01-23","deviation":1.46},{"date":"2022-01-30","deviation":1.42},{"date":"2022-02-06","deviation":1.32},{"date":"2022-02-13","deviation":1.15},{"date":"2022-02-20","deviation":1.09},{"date":"2022-02-27","deviation":1.14},{"date":"2022-03-06","deviation":1.21},{"date":"2022-03-13","deviation":1.29},{"date":"2022-03-20","deviation":1.3},{"date":"2022-03-27","deviation":1.29},{"date":"2022-04-03","deviation":1.22},{"date":"2022-04-10","deviation":1.2},{"date":"2022-04-17","deviation":1.17},{"date":"2022-04-24","deviation":1.22},{"date":"2022-05-01","deviation":1.27},{"date":"2022-05-08","deviation":1.24},{"date":"2022-05-15","deviation":1.25},{"date":"2022-05-22","deviation":1.21},{"date":"2022-05-29","deviation":1.23},{"date":"2022-06-05","deviation":1.15},{"date":"2022-06-12","deviation":1.14},{"date":"2022-06-19","deviation":0.94},{"date":"2022-06-26","deviation":0.82},{"date":"2022-07-03","deviation":0.84},{"date":"2022-07-10","deviation":0.87},{"date":"2022-07-17","deviation":0.7},{"date":"2022-07-24","deviation":0.64},{"date":"2022-07-31","deviation":0.62},{"date":"2022-08-07","deviation":0.7},{"date":"2022-08-14","deviation":0.6},{"date":"2022-08-21","deviation":0.58},{"date":"2022-08-28","deviation":0.6},{"date":"2022-09-04","deviation":0.65},{"date":"2022-09-11","deviation":0.66},{"date":"2022-09-18","deviation":0.67},{"date":"2022-09-25","deviation":0.58},{"date":"2022-10-02","deviation":0.58},{"date":"2022-10-09","deviation":0.59},{"date":"2022-10-16","deviation":0.56},{"date":"2022-10-23","deviation":0.53},{"date":"2022-10-30","deviation":0.5},{"date":"2022-11-06","deviation":0.48},{"date":"2022-11-13","deviation":0.52},{"date":"2022-11-20","deviation":0.48},{"date":"2022-11-27","deviation":0.51},{"date":"2022-12-04","deviation":0.48},{"date":"2022-12-11","deviation":0.47},{"date":"2022-12-18","deviation":0.45},{"date":"2022-12-25","deviation":0.45},{"date":"2023-01-01","deviation":0.45},{"date":"2023-01-08","deviation":0.45},{"date":"2023-01-15","deviation":0.44},{"date":"2023-01-22","deviation":0.45},{"date":"2023-01-29","deviation":0.46},{"date":"2023-02-05","deviation":0.45},{"date":"2023-02-12","deviation":0.45},{"date":"2023-02-19","deviation":0.45},{"date":"2023-02-26","deviation":0.44},{"date":"2023-03-05","deviation":0.44},{"date":"2023-03-12","deviation":0.46},{"date":"2023-03-19","deviation":0.45},{"date":"2023-03-26","deviation":0.45},{"date":"2023-04-02","deviation":0.45},{"date":"2023-04-09","deviation":0.45},{"date":"2023-04-16","deviation":0.43},{"date":"2023-04-23","deviation":0.44},{"date":"2023-04-30","deviation":0.42},{"date":"2023-05-07","deviation":0.44},{"date":"2023-05-14","deviation":0.43},{"date":"2023-05-21","deviation":0.42},{"date":"2023-05-28","deviation":0.41},{"date":"2023-06-04","deviation":0.43},{"date":"2023-06-11","deviation":0.45},{"date":"2023-06-18","deviation":0.44},{"date":"2023-06-25","deviation":0.42},{"date":"2023-07-02","deviation":0.43},{"date":"2023-07-09","deviation":0.4},{"date":"2023-07-16","deviation":0.4},{"date":"2023-07-23","deviation":0.41},{"date":"2023-07-30","deviation":0.52},{"date":"2023-08-06","deviation":0.54},{"date":"2023-08-13","deviation":0.57},{"date":"2023-08-20","deviation":0.57},{"date":"2023-08-27","deviation":0.6},{"date":"2023-09-03","deviation":0.63},{"date":"2023-09-10","deviation":0.63},{"date":"2023-09-17","deviation":0.64},{"date":"2023-09-24","deviation":0.64},{"date":"2023-10-01","deviation":0.64},{"date":"2023-10-08","deviation":0.63},{"date":"2023-10-15","deviation":0.64},{"date":"2023-10-22","deviation":0.61},{"date":"2023-10-29","deviation":0.64},{"date":"2023-11-05","deviation":0.64},{"date":"2023-11-12","deviation":0.61},{"date":"2023-11-19","deviation":0.62},{"date":"2023-11-26","deviation":0.63},{"date":"2023-12-03","deviation":0.6},{"date":"2023-12-10","deviation":0.53},{"date":"2023-12-17","deviation":0.54},{"date":"2023-12-24","deviation":0.51},{"date":"2023-12-31","deviation":0.5},{"date":"2024-01-07","deviation":0.49},{"date":"2024-01-14","deviation":0.5},{"date":"2024-01-21","deviation":0.5},{"date":"2024-01-28","deviation":0.53},{"date":"2024-02-04","deviation":0.52},{"date":"2024-02-11","deviation":0.53},{"date":"2024-02-18","deviation":0.52},{"date":"2024-02-25","deviation":0.51},{"date":"2024-03-03","deviation":0.46},{"date":"2024-03-10","deviation":0.47},{"date":"2024-03-17","deviation":0.47},{"date":"2024-03-24","deviation":0.45},{"date":"2024-03-31","deviation":0.44},{"date":"2024-04-07","deviation":0.43},{"date":"2024-04-14","deviation":0.43},{"date":"2024-04-21","deviation":0.41},{"date":"2024-04-28","deviation":0.41},{"date":"2024-05-05","deviation":0.43},{"date":"2024-05-12","deviation":0.43},{"date":"2024-05-19","deviation":0.42},{"date":"2024-05-26","deviation":0.41},{"date":"2024-06-02","deviation":0.41},{"date":"2024-06-09","deviation":0.41},{"date":"2024-06-16","deviation":0.41},{"date":"2024-06-23","deviation":0.42},{"date":"2024-06-30","deviation":0.41},{"date":"2024-07-07","deviation":0.41},{"date":"2024-07-14","deviation":0.42},{"date":"2024-07-21","deviation":0.43},{"date":"2024-07-28","deviation":0.44},{"date":"2024-08-04","deviation":0.43},{"date":"2024-08-11","deviation":0.43},{"date":"2024-08-18","deviation":0.42},{"date":"2024-08-25","deviation":0.41},{"date":"2024-09-01","deviation":0.41},{"date":"2024-09-08","deviation":0.39},{"date":"2024-09-15","deviation":0.38},{"date":"2024-09-22","deviation":0.45},{"date":"2024-09-29","deviation":0.45},{"date":"2024-10-06","deviation":0.46},{"date":"2024-10-13","deviation":0.48},{"date":"2024-10-20","deviation":0.69},{"date":"2024-10-27","deviation":1.08},{"date":"2024-11-03","deviation":1.91},{"date":"2024-11-10","deviation":3.6},{"date":"2024-11-17","deviation":3.35},{"date":"2024-11-24","deviation":3.17},{"date":"2024-12-01","deviation":3.14},{"date":"2024-12-08","deviation":2.98},{"date":"2024-12-15","deviation":2.92},{"date":"2024-12-22","deviation":2.81},{"date":"2024-12-29","deviation":2.75},{"date":"2025-01-05","deviation":2.66},{"date":"2025-01-12","deviation":2.53},{"date":"2025-01-19","deviation":2.43},{"date":"2025-01-26","deviation":2.38},{"date":"2025-02-02","deviation":2.31},{"date":"2025-02-09","deviation":2.26},{"date":"2025-02-16","deviation":2.27},{"date":"2025-02-23","deviation":2.14},{"date":"2025-03-02","deviation":1.99},{"date":"2025-03-09","deviation":1.84},{"date":"2025-03-16","deviation":1.8},{"date":"2025-03-23","deviation":1.8},{"date":"2025-03-30","deviation":2.27},{"date":"2025-04-06","deviation":2.1},{"date":"2025-04-13","deviation":2.03},{"date":"2025-04-20","deviation":2.07},{"date":"2025-04-27","deviation":2.06},{"date":"2025-05-04","deviation":2.0},{"date":"2025-05-11","deviation":1.82},{"date":"2025-05-18","deviation":1.8},{"date":"2025-05-25","deviation":1.54},{"date":"2025-06-01","deviation":1.7},{"date":"2025-06-08","deviation":1.49},{"date":"2025-06-15","deviation":1.37},{"date":"2025-06-22","deviation":1.42},{"date":"2025-06-29","deviation":1.45},{"date":"2025-07-06","deviation":1.46},{"date":"2025-07-13","deviation":1.42},{"date":"2025-07-20","deviation":1.39},{"date":"2025-07-27","deviation":1.37},{"date":"2025-08-03","deviation":1.32},{"date":"2025-08-10","deviation":1.29},{"date":"2025-08-17","deviation":1.17},{"date":"2025-08-24","deviation":1.19},{"date":"2025-08-31","deviation":1.16},{"date":"2025-09-07","deviation":1.16},{"date":"2025-09-14","deviation":0.92},{"date":"2025-09-21","deviation":0.91},{"date":"2025-09-28","deviation":0.85},{"date":"2025-10-05","deviation":0.99},{"date":"2025-10-12","deviation":1.09},{"date":"2025-10-19","deviation":1.2},{"date":"2025-10-26","deviation":1.15},{"date":"2025-11-02","deviation":1.13},{"date":"2025-11-09","deviation":1.08},{"date":"2025-11-16","deviation":1.06}],"xKey":"date","yKeys":["deviation"],"title":"Kalshi: Calibration Accuracy Over Time","yUnit":"percent","xLabel":"Date","yLabel":"Mean Absolute Deviation (%)"},{"type":"stacked-bar-100","data":[{"quarter":"2021 Q3","1_10":1.25,"11_20":1.89,"21_30":2.69,"31_40":3.91,"41_50":4.9,"51_60":5.92,"61_70":8.68,"71_80":10.76,"81_90":16.45,"91_99":43.54},{"quarter":"2021 Q4","1_10":1.23,"11_20":2.2,"21_30":3.68,"31_40":3.94,"41_50":4.82,"51_60":6.4,"61_70":8.92,"71_80":14.19,"81_90":17.82,"91_99":36.8},{"quarter":"2022 Q1","1_10":1.59,"11_20":2.43,"21_30":3.2,"31_40":4.0,"41_50":5.12,"51_60":6.34,"61_70":9.16,"71_80":11.6,"81_90":18.3,"91_99":38.26},{"quarter":"2022 Q2","1_10":2.39,"11_20":3.89,"21_30":3.37,"31_40":3.75,"41_50":3.93,"51_60":4.82,"61_70":6.49,"71_80":10.92,"81_90":18.21,"91_99":42.23},{"quarter":"2022 Q3","1_10":2.04,"11_20":3.53,"21_30":3.39,"31_40":3.95,"41_50":4.81,"51_60":5.59,"61_70":7.12,"71_80":10.47,"81_90":17.33,"91_99":41.79},{"quarter":"2022 Q4","1_10":1.64,"11_20":3.29,"21_30":3.9,"31_40":4.47,"41_50":4.87,"51_60":5.72,"61_70":7.29,"71_80":10.75,"81_90":16.26,"91_99":41.8},{"quarter":"2023 Q1","1_10":1.55,"11_20":3.33,"21_30":4.31,"31_40":4.95,"41_50":6.24,"51_60":6.94,"61_70":8.34,"71_80":11.06,"81_90":15.69,"91_99":37.6},{"quarter":"2023 Q2","1_10":3.22,"11_20":2.48,"21_30":3.41,"31_40":3.94,"41_50":4.38,"51_60":5.5,"61_70":7.92,"71_80":10.58,"81_90":16.52,"91_99":42.04},{"quarter":"2023 Q3","1_10":3.55,"11_20":2.39,"21_30":3.2,"31_40":3.91,"41_50":4.71,"51_60":5.6,"61_70":7.35,"71_80":8.51,"81_90":13.66,"91_99":47.12},{"quarter":"2023 Q4","1_10":4.31,"11_20":2.01,"21_30":2.97,"31_40":3.75,"41_50":4.64,"51_60":5.74,"61_70":6.46,"71_80":8.61,"81_90":12.24,"91_99":49.28},{"quarter":"2024 Q1","1_10":1.92,"11_20":2.16,"21_30":3.14,"31_40":4.14,"41_50":4.98,"51_60":5.81,"61_70":7.65,"71_80":8.62,"81_90":15.21,"91_99":46.37},{"quarter":"2024 Q2","1_10":1.69,"11_20":1.85,"21_30":2.32,"31_40":2.67,"41_50":3.36,"51_60":4.01,"61_70":4.48,"71_80":5.63,"81_90":15.37,"91_99":58.61},{"quarter":"2024 Q3","1_10":2.16,"11_20":2.68,"21_30":3.47,"31_40":4.23,"41_50":5.24,"51_60":6.44,"61_70":8.02,"71_80":11.31,"81_90":16.74,"91_99":39.71},{"quarter":"2024 Q4","1_10":2.22,"11_20":2.05,"21_30":2.39,"31_40":4.4,"41_50":9.1,"51_60":11.09,"61_70":7.59,"71_80":5.59,"81_90":8.27,"91_99":47.3},{"quarter":"2025 Q1","1_10":1.73,"11_20":2.91,"21_30":4.31,"31_40":5.16,"41_50":6.5,"51_60":8.35,"61_70":11.04,"71_80":14.78,"81_90":17.13,"91_99":28.11},{"quarter":"2025 Q2","1_10":1.94,"11_20":3.78,"21_30":5.62,"31_40":6.96,"41_50":8.24,"51_60":10.53,"61_70":11.93,"71_80":14.26,"81_90":16.49,"91_99":20.25},{"quarter":"2025 Q3","1_10":1.47,"11_20":2.75,"21_30":4.49,"31_40":7.15,"41_50":9.98,"51_60":12.73,"61_70":13.47,"71_80":14.33,"81_90":15.5,"91_99":18.14},{"quarter":"2025 Q4","1_10":1.26,"11_20":2.8,"21_30":4.72,"31_40":7.42,"41_50":11.01,"51_60":14.34,"61_70":13.24,"71_80":12.61,"81_90":14.67,"91_99":17.94}],"xKey":"quarter","yKeys":["1_10","11_20","21_30","31_40","41_50","51_60","61_70","71_80","81_90","91_99"],"title":"Taker Volume Distribution by Price","yUnit":"percent","xLabel":"Quarter","yLabel":"Volume Share (%)"},{"type":"line","data":[{"price":1,"Maker bought YES":0.22,"Maker bought NO":1.34},{"price":2,"Maker bought YES":0.25,"Maker bought NO":1.11},{"price":3,"Maker bought YES":0.51,"Maker bought NO":1.06},{"price":4,"Maker bought YES":0.18,"Maker bought NO":1.04},{"price":5,"Maker bought YES":-0.07,"Maker bought NO":0.08},{"price":6,"Maker bought YES":-0.04,"Maker bought NO":0.08},{"price":7,"Maker bought YES":0.16,"Maker bought NO":-0.04},{"price":8,"Maker bought YES":0.33,"Maker bought NO":0.08},{"price":9,"Maker bought YES":0.11,"Maker bought NO":0.11},{"price":10,"Maker bought YES":0.04,"Maker bought NO":0.35},{"price":11,"Maker bought YES":-0.14,"Maker bought NO":0.63},{"price":12,"Maker bought YES":0.11,"Maker bought NO":0.61},{"price":13,"Maker bought YES":-0.32,"Maker bought NO":0.4},{"price":14,"Maker bought YES":-0.57,"Maker bought NO":-0.66},{"price":15,"Maker bought YES":0.15,"Maker bought NO":0.3},{"price":16,"Maker bought YES":0.33,"Maker bought NO":0.35},{"price":17,"Maker bought YES":0.07,"Maker bought NO":-0.97},{"price":18,"Maker bought YES":0.1,"Maker bought NO":0.01},{"price":19,"Maker bought YES":-0.02,"Maker bought NO":-0.11},{"price":20,"Maker bought YES":0.09,"Maker bought NO":4.72},{"price":21,"Maker bought YES":1.57,"Maker bought NO":4.18},{"price":22,"Maker bought YES":0.26,"Maker bought NO":-0.6},{"price":23,"Maker bought YES":0.15,"Maker bought NO":-2.3},{"price":24,"Maker bought YES":-0.2,"Maker bought NO":-2.73},{"price":25,"Maker bought YES":-0.03,"Maker bought NO":-1.96},{"price":26,"Maker bought YES":0.27,"Maker bought NO":-1.14},{"price":27,"Maker bought YES":0.17,"Maker bought NO":0.51},{"price":28,"Maker bought YES":1.01,"Maker bought NO":4.98},{"price":29,"Maker bought YES":0.11,"Maker bought NO":0.87},{"price":30,"Maker bought YES":-0.47,"Maker bought NO":2.0},{"price":31,"Maker bought YES":1.82,"Maker bought NO":4.75},{"price":32,"Maker bought YES":1.84,"Maker bought NO":3.32},{"price":33,"Maker bought YES":1.13,"Maker bought NO":3.44},{"price":34,"Maker bought YES":0.84,"Maker bought NO":4.22},{"price":35,"Maker bought YES":0.02,"Maker bought NO":0.34},{"price":36,"Maker bought YES":1.71,"Maker bought NO":-1.05},{"price":37,"Maker bought YES":1.53,"Maker bought NO":2.46},{"price":38,"Maker bought YES":0.46,"Maker bought NO":4.63},{"price":39,"Maker bought YES":0.18,"Maker bought NO":2.02},{"price":40,"Maker bought YES":0.94,"Maker bought NO":1.96},{"price":41,"Maker bought YES":1.09,"Maker bought NO":0.71},{"price":42,"Maker bought YES":0.24,"Maker bought NO":-1.5},{"price":43,"Maker bought YES":-0.26,"Maker bought NO":-1.19},{"price":44,"Maker bought YES":0.61,"Maker bought NO":1.16},{"price":45,"Maker bought YES":0.08,"Maker bought NO":0.41},{"price":46,"Maker bought YES":0.86,"Maker bought NO":1.11},{"price":47,"Maker bought YES":-1.44,"Maker bought NO":-0.81},{"price":48,"Maker bought YES":-0.03,"Maker bought NO":-0.78},{"price":49,"Maker bought YES":0.64,"Maker bought NO":0.67},{"price":50,"Maker bought YES":0.16,"Maker bought NO":1.83},{"price":51,"Maker bought YES":1.6,"Maker bought NO":3.24},{"price":52,"Maker bought YES":1.41,"Maker bought NO":2.73},{"price":53,"Maker bought YES":1.11,"Maker bought NO":2.91},{"price":54,"Maker bought YES":1.21,"Maker bought NO":0.73},{"price":55,"Maker bought YES":1.4,"Maker bought NO":2.52},{"price":56,"Maker bought YES":1.73,"Maker bought NO":4.31},{"price":57,"Maker bought YES":1.45,"Maker bought NO":3.97},{"price":58,"Maker bought YES":1.06,"Maker bought NO":3.4},{"price":59,"Maker bought YES":1.26,"Maker bought NO":1.78},{"price":60,"Maker bought YES":1.19,"Maker bought NO":1.67},{"price":61,"Maker bought YES":1.91,"Maker bought NO":1.88},{"price":62,"Maker bought YES":1.99,"Maker bought NO":2.07},{"price":63,"Maker bought YES":1.96,"Maker bought NO":-0.27},{"price":64,"Maker bought YES":1.1,"Maker bought NO":0.08},{"price":65,"Maker bought YES":0.09,"Maker bought NO":0.1},{"price":66,"Maker bought YES":-0.26,"Maker bought NO":-1.52},{"price":67,"Maker bought YES":1.03,"Maker bought NO":-1.49},{"price":68,"Maker bought YES":-0.02,"Maker bought NO":-2.44},{"price":69,"Maker bought YES":1.72,"Maker bought NO":2.96},{"price":70,"Maker bought YES":0.63,"Maker bought NO":1.47},{"price":71,"Maker bought YES":-0.06,"Maker bought NO":0.62},{"price":72,"Maker bought YES":1.44,"Maker bought NO":1.35},{"price":73,"Maker bought YES":2.66,"Maker bought NO":2.84},{"price":74,"Maker bought YES":3.06,"Maker bought NO":3.13},{"price":75,"Maker bought YES":1.31,"Maker bought NO":2.91},{"price":76,"Maker bought YES":2.61,"Maker bought NO":2.57},{"price":77,"Maker bought YES":2.66,"Maker bought NO":1.48},{"price":78,"Maker bought YES":1.13,"Maker bought NO":-2.31},{"price":79,"Maker bought YES":0.95,"Maker bought NO":-0.61},{"price":80,"Maker bought YES":1.79,"Maker bought NO":0.96},{"price":81,"Maker bought YES":2.67,"Maker bought NO":1.99},{"price":82,"Maker bought YES":2.42,"Maker bought NO":2.28},{"price":83,"Maker bought YES":2.27,"Maker bought NO":1.53},{"price":84,"Maker bought YES":2.19,"Maker bought NO":1.61},{"price":85,"Maker bought YES":1.87,"Maker bought NO":2.33},{"price":86,"Maker bought YES":1.87,"Maker bought NO":1.29},{"price":87,"Maker bought YES":1.71,"Maker bought NO":1.09},{"price":88,"Maker bought YES":1.82,"Maker bought NO":2.15},{"price":89,"Maker bought YES":1.97,"Maker bought NO":2.38},{"price":90,"Maker bought YES":2.08,"Maker bought NO":2.23},{"price":91,"Maker bought YES":2.14,"Maker bought NO":2.3},{"price":92,"Maker bought YES":2.17,"Maker bought NO":2.0},{"price":93,"Maker bought YES":2.46,"Maker bought NO":2.23},{"price":94,"Maker bought YES":2.19,"Maker bought NO":2.04},{"price":95,"Maker bought YES":1.37,"Maker bought NO":1.62},{"price":96,"Maker bought YES":1.43,"Maker bought NO":1.56},{"price":97,"Maker bought YES":1.41,"Maker bought NO":1.17},{"price":98,"Maker bought YES":0.65,"Maker bought NO":0.94},{"price":99,"Maker bought YES":0.57,"Maker bought NO":0.6}],"xKey":"price","yKeys":["Maker bought YES","Maker bought NO"],"title":"Maker Excess Returns by Position Direction","yUnit":"percent","xLabel":"Maker's Purchase Price (cents)","yLabel":"Excess Return (pp)"},{"type":"line","data":[{"quarter":"2021 Q3","Taker Return":3.87,"Maker Return":-3.87},{"quarter":"2021 Q4","Taker Return":3.19,"Maker Return":-3.19},{"quarter":"2022 Q1","Taker Return":4.13,"Maker Return":-4.13},{"quarter":"2022 Q2","Taker Return":3.05,"Maker Return":-3.05},{"quarter":"2022 Q3","Taker Return":1.65,"Maker Return":-1.65},{"quarter":"2022 Q4","Taker Return":0.88,"Maker Return":-0.88},{"quarter":"2023 Q1","Taker Return":0.92,"Maker Return":-0.92},{"quarter":"2023 Q2","Taker Return":0.93,"Maker Return":-0.93},{"quarter":"2023 Q3","Taker Return":1.03,"Maker Return":-1.03},{"quarter":"2023 Q4","Taker Return":-0.0,"Maker Return":0.0},{"quarter":"2024 Q1","Taker Return":0.29,"Maker Return":-0.29},{"quarter":"2024 Q2","Taker Return":-0.75,"Maker Return":0.75},{"quarter":"2024 Q3","Taker Return":-0.69,"Maker Return":0.69},{"quarter":"2024 Q4","Taker Return":-1.43,"Maker Return":1.43},{"quarter":"2025 Q1","Taker Return":-1.16,"Maker Return":1.16},{"quarter":"2025 Q2","Taker Return":-1.12,"Maker Return":1.12},{"quarter":"2025 Q3","Taker Return":-1.15,"Maker Return":1.15},{"quarter":"2025 Q4","Taker Return":-1.34,"Maker Return":1.34}],"xKey":"quarter","yKeys":["Taker Return","Maker Return"],"title":"Maker-Taker Returns Over Time","yUnit":"percent","xLabel":"Quarter","yLabel":"Excess Return (pp)"},{"type":"bar","data":[{"category":"Sports","Taker Return":-1.11,"Maker Return":1.12},{"category":"Politics","Taker Return":-0.51,"Maker Return":0.51},{"category":"Crypto","Taker Return":-1.34,"Maker Return":1.34},{"category":"Finance","Taker Return":-0.08,"Maker Return":0.08},{"category":"Weather","Taker Return":-1.29,"Maker Return":1.29},{"category":"Entertainment","Taker Return":-2.4,"Maker Return":2.4},{"category":"Other","Taker Return":-1.19,"Maker Return":1.19},{"category":"Media","Taker Return":-3.64,"Maker Return":3.64}],"xKey":"category","yKeys":["Taker Return","Maker Return"],"title":"Maker vs Taker Returns by Category","yUnit":"percent","colors":{"Taker Return":"#e74c3c","Maker Return":"#2ecc71"},"xLabel":"Category","yLabel":"Volume-Weighted Excess Return (pp)"},{"type":"line","data":[{"price":1,"Taker":-0.57,"Maker (counterparty)":0.58},{"price":2,"Taker":-0.84,"Maker (counterparty)":0.86},{"price":3,"Taker":-1.23,"Maker (counterparty)":1.24},{"price":4,"Taker":-1.52,"Maker (counterparty)":1.53},{"price":5,"Taker":-1.55,"Maker (counterparty)":1.56},{"price":6,"Taker":-2.06,"Maker (counterparty)":2.07},{"price":7,"Taker":-2.28,"Maker (counterparty)":2.29},{"price":8,"Taker":-2.03,"Maker (counterparty)":2.04},{"price":9,"Taker":-2.25,"Maker (counterparty)":2.26},{"price":10,"Taker":-2.18,"Maker (counterparty)":2.2},{"price":11,"Taker":-2.27,"Maker (counterparty)":2.29},{"price":12,"Taker":-2.08,"Maker (counterparty)":2.08},{"price":13,"Taker":-1.21,"Maker (counterparty)":1.22},{"price":14,"Taker":-1.42,"Maker (counterparty)":1.41},{"price":15,"Taker":-2.22,"Maker (counterparty)":2.23},{"price":16,"Taker":-1.73,"Maker (counterparty)":1.73},{"price":17,"Taker":-1.68,"Maker (counterparty)":1.68},{"price":18,"Taker":-2.3,"Maker (counterparty)":2.31},{"price":19,"Taker":-2.13,"Maker (counterparty)":2.14},{"price":20,"Taker":-1.16,"Maker (counterparty)":1.15},{"price":21,"Taker":0.3,"Maker (counterparty)":-0.29},{"price":22,"Taker":1.59,"Maker (counterparty)":-1.6},{"price":23,"Taker":-1.73,"Maker (counterparty)":1.73},{"price":24,"Taker":-2.56,"Maker (counterparty)":2.58},{"price":25,"Taker":-2.54,"Maker (counterparty)":2.55},{"price":26,"Taker":-3.11,"Maker (counterparty)":3.12},{"price":27,"Taker":-2.81,"Maker (counterparty)":2.8},{"price":28,"Taker":-1.37,"Maker (counterparty)":1.37},{"price":29,"Taker":-0.45,"Maker (counterparty)":0.47},{"price":30,"Taker":-1.27,"Maker (counterparty)":1.27},{"price":31,"Taker":-2.71,"Maker (counterparty)":2.7},{"price":32,"Taker":1.93,"Maker (counterparty)":-1.92},{"price":33,"Taker":0.94,"Maker (counterparty)":-0.94},{"price":34,"Taker":1.23,"Maker (counterparty)":-1.23},{"price":35,"Taker":-0.1,"Maker (counterparty)":0.1},{"price":36,"Taker":-0.3,"Maker (counterparty)":0.3},{"price":37,"Taker":-0.22,"Maker (counterparty)":0.21},{"price":38,"Taker":-2.04,"Maker (counterparty)":2.05},{"price":39,"Taker":-1.88,"Maker (counterparty)":1.89},{"price":40,"Taker":-1.55,"Maker (counterparty)":1.55},{"price":41,"Taker":-1.66,"Maker (counterparty)":1.66},{"price":42,"Taker":-2.84,"Maker (counterparty)":2.84},{"price":43,"Taker":-3.41,"Maker (counterparty)":3.4},{"price":44,"Taker":-3.73,"Maker (counterparty)":3.73},{"price":45,"Taker":-2.24,"Maker (counterparty)":2.24},{"price":46,"Taker":-0.84,"Maker (counterparty)":0.84},{"price":47,"Taker":-2.48,"Maker (counterparty)":2.48},{"price":48,"Taker":-2.42,"Maker (counterparty)":2.41},{"price":49,"Taker":-2.81,"Maker (counterparty)":2.81},{"price":50,"Taker":-1.32,"Maker (counterparty)":1.33},{"price":51,"Taker":-0.66,"Maker (counterparty)":0.66},{"price":52,"Taker":0.57,"Maker (counterparty)":-0.57},{"price":53,"Taker":0.97,"Maker (counterparty)":-0.98},{"price":54,"Taker":-1.04,"Maker (counterparty)":1.04},{"price":55,"Taker":-0.32,"Maker (counterparty)":0.32},{"price":56,"Taker":-1.02,"Maker (counterparty)":1.02},{"price":57,"Taker":0.95,"Maker (counterparty)":-0.95},{"price":58,"Taker":1.05,"Maker (counterparty)":-1.05},{"price":59,"Taker":-0.81,"Maker (counterparty)":0.81},{"price":60,"Taker":-1.66,"Maker (counterparty)":1.66},{"price":61,"Taker":-1.52,"Maker (counterparty)":1.51},{"price":62,"Taker":-3.49,"Maker (counterparty)":3.5},{"price":63,"Taker":-2.2,"Maker (counterparty)":2.2},{"price":64,"Taker":0.28,"Maker (counterparty)":-0.28},{"price":65,"Taker":-0.25,"Maker (counterparty)":0.25},{"price":66,"Taker":-3.2,"Maker (counterparty)":3.2},{"price":67,"Taker":-2.7,"Maker (counterparty)":2.7},{"price":68,"Taker":-2.86,"Maker (counterparty)":2.86},{"price":69,"Taker":-3.82,"Maker (counterparty)":3.82},{"price":70,"Taker":-1.14,"Maker (counterparty)":1.14},{"price":71,"Taker":-0.62,"Maker (counterparty)":0.61},{"price":72,"Taker":-3.57,"Maker (counterparty)":3.58},{"price":73,"Taker":-0.4,"Maker (counterparty)":0.4},{"price":74,"Taker":0.62,"Maker (counterparty)":-0.62},{"price":75,"Taker":1.2,"Maker (counterparty)":-1.2},{"price":76,"Taker":1.78,"Maker (counterparty)":-1.78},{"price":77,"Taker":1.38,"Maker (counterparty)":-1.38},{"price":78,"Taker":0.27,"Maker (counterparty)":-0.27},{"price":79,"Taker":-3.17,"Maker (counterparty)":3.17},{"price":80,"Taker":-2.85,"Maker (counterparty)":2.85},{"price":81,"Taker":0.08,"Maker (counterparty)":-0.08},{"price":82,"Taker":-0.05,"Maker (counterparty)":0.05},{"price":83,"Taker":0.51,"Maker (counterparty)":-0.51},{"price":84,"Taker":-0.34,"Maker (counterparty)":0.34},{"price":85,"Taker":-0.23,"Maker (counterparty)":0.23},{"price":86,"Taker":0.62,"Maker (counterparty)":-0.62},{"price":87,"Taker":-0.06,"Maker (counterparty)":0.06},{"price":88,"Taker":-0.38,"Maker (counterparty)":0.38},{"price":89,"Taker":-0.26,"Maker (counterparty)":0.26},{"price":90,"Taker":-0.2,"Maker (counterparty)":0.2},{"price":91,"Taker":-0.11,"Maker (counterparty)":0.11},{"price":92,"Taker":-0.21,"Maker (counterparty)":0.21},{"price":93,"Taker":-0.07,"Maker (counterparty)":0.07},{"price":94,"Taker":-0.02,"Maker (counterparty)":0.02},{"price":95,"Taker":0.0,"Maker (counterparty)":-0.0},{"price":96,"Taker":-0.54,"Maker (counterparty)":0.54},{"price":97,"Taker":-0.72,"Maker (counterparty)":0.72},{"price":98,"Taker":-0.56,"Maker (counterparty)":0.56},{"price":99,"Taker":-0.57,"Maker (counterparty)":0.57}],"xKey":"price","yKeys":["Taker","Maker (counterparty)"],"title":"Maker vs Taker Excess Returns by Price","yUnit":"percent","xLabel":"Contract Price (cents)","yLabel":"Excess Return (pp)"},{"type":"line","data":[{"price":1,"Maker bought YES":0.72,"Maker bought NO":1.41,"Implied probability":1.0},{"price":2,"Maker bought YES":1.5,"Maker bought NO":1.71,"Implied probability":2.0},{"price":3,"Maker bought YES":2.81,"Maker bought NO":3.1,"Implied probability":3.0},{"price":4,"Maker bought YES":3.6,"Maker bought NO":4.54,"Implied probability":4.0},{"price":5,"Maker bought YES":4.01,"Maker bought NO":3.93,"Implied probability":5.0},{"price":6,"Maker bought YES":5.54,"Maker bought NO":4.98,"Implied probability":6.0},{"price":7,"Maker bought YES":6.44,"Maker bought NO":5.76,"Implied probability":7.0},{"price":8,"Maker bought YES":7.51,"Maker bought NO":7.71,"Implied probability":8.0},{"price":9,"Maker bought YES":8.17,"Maker bought NO":8.32,"Implied probability":9.0},{"price":10,"Maker bought YES":9.02,"Maker bought NO":8.83,"Implied probability":10.0},{"price":11,"Maker bought YES":9.14,"Maker bought NO":10.52,"Implied probability":11.0},{"price":12,"Maker bought YES":11.61,"Maker bought NO":12.47,"Implied probability":12.0},{"price":13,"Maker bought YES":12.01,"Maker bought NO":12.24,"Implied probability":13.0},{"price":14,"Maker bought YES":12.33,"Maker bought NO":12.71,"Implied probability":14.0},{"price":15,"Maker bought YES":14.76,"Maker bought NO":15.47,"Implied probability":15.0},{"price":16,"Maker bought YES":15.24,"Maker bought NO":15.25,"Implied probability":16.0},{"price":17,"Maker bought YES":16.15,"Maker bought NO":15.07,"Implied probability":17.0},{"price":18,"Maker bought YES":17.22,"Maker bought NO":16.69,"Implied probability":18.0},{"price":19,"Maker bought YES":19.15,"Maker bought NO":19.52,"Implied probability":19.0},{"price":20,"Maker bought YES":19.42,"Maker bought NO":25.09,"Implied probability":20.0},{"price":21,"Maker bought YES":22.98,"Maker bought NO":26.66,"Implied probability":21.0},{"price":22,"Maker bought YES":23.06,"Maker bought NO":19.73,"Implied probability":22.0},{"price":23,"Maker bought YES":23.78,"Maker bought NO":19.17,"Implied probability":23.0},{"price":24,"Maker bought YES":22.61,"Maker bought NO":19.12,"Implied probability":24.0},{"price":25,"Maker bought YES":23.87,"Maker bought NO":21.24,"Implied probability":25.0},{"price":26,"Maker bought YES":26.32,"Maker bought NO":24.03,"Implied probability":26.0},{"price":27,"Maker bought YES":28.49,"Maker bought NO":27.89,"Implied probability":27.0},{"price":28,"Maker bought YES":29.84,"Maker bought NO":34.0,"Implied probability":28.0},{"price":29,"Maker bought YES":28.16,"Maker bought NO":28.56,"Implied probability":29.0},{"price":30,"Maker bought YES":29.16,"Maker bought NO":30.92,"Implied probability":30.0},{"price":31,"Maker bought YES":33.84,"Maker bought NO":35.87,"Implied probability":31.0},{"price":32,"Maker bought YES":34.48,"Maker bought NO":36.3,"Implied probability":32.0},{"price":33,"Maker bought YES":34.63,"Maker bought NO":37.56,"Implied probability":33.0},{"price":34,"Maker bought YES":35.77,"Maker bought NO":37.68,"Implied probability":34.0},{"price":35,"Maker bought YES":32.0,"Maker bought NO":34.87,"Implied probability":35.0},{"price":36,"Maker bought YES":36.19,"Maker bought NO":34.78,"Implied probability":36.0},{"price":37,"Maker bought YES":36.18,"Maker bought NO":39.0,"Implied probability":37.0},{"price":38,"Maker bought YES":32.61,"Maker bought NO":40.75,"Implied probability":38.0},{"price":39,"Maker bought YES":37.65,"Maker bought NO":40.26,"Implied probability":39.0},{"price":40,"Maker bought YES":39.48,"Maker bought NO":40.13,"Implied probability":40.0},{"price":41,"Maker bought YES":39.44,"Maker bought NO":38.37,"Implied probability":41.0},{"price":42,"Maker bought YES":37.86,"Maker bought NO":36.97,"Implied probability":42.0},{"price":43,"Maker bought YES":38.54,"Maker bought NO":38.89,"Implied probability":43.0},{"price":44,"Maker bought YES":41.83,"Maker bought NO":41.8,"Implied probability":44.0},{"price":45,"Maker bought YES":42.54,"Maker bought NO":42.46,"Implied probability":45.0},{"price":46,"Maker bought YES":45.71,"Maker bought NO":46.82,"Implied probability":46.0},{"price":47,"Maker bought YES":43.92,"Maker bought NO":46.1,"Implied probability":47.0},{"price":48,"Maker bought YES":48.42,"Maker bought NO":46.12,"Implied probability":48.0},{"price":49,"Maker bought YES":50.17,"Maker bought NO":49.44,"Implied probability":49.0},{"price":50,"Maker bought YES":50.74,"Maker bought NO":51.78,"Implied probability":50.0},{"price":51,"Maker bought YES":53.38,"Maker bought NO":54.36,"Implied probability":51.0},{"price":52,"Maker bought YES":53.91,"Maker bought NO":54.48,"Implied probability":52.0},{"price":53,"Maker bought YES":55.12,"Maker bought NO":56.1,"Implied probability":53.0},{"price":54,"Maker bought YES":55.03,"Maker bought NO":54.75,"Implied probability":54.0},{"price":55,"Maker bought YES":63.53,"Maker bought NO":59.04,"Implied probability":55.0},{"price":56,"Maker bought YES":61.89,"Maker bought NO":62.57,"Implied probability":56.0},{"price":57,"Maker bought YES":64.85,"Maker bought NO":65.64,"Implied probability":57.0},{"price":58,"Maker bought YES":65.64,"Maker bought NO":64.02,"Implied probability":58.0},{"price":59,"Maker bought YES":64.14,"Maker bought NO":62.54,"Implied probability":59.0},{"price":60,"Maker bought YES":65.48,"Maker bought NO":62.38,"Implied probability":60.0},{"price":61,"Maker bought YES":65.29,"Maker bought NO":63.29,"Implied probability":61.0},{"price":62,"Maker bought YES":69.48,"Maker bought NO":64.09,"Implied probability":62.0},{"price":63,"Maker bought YES":66.49,"Maker bought NO":62.05,"Implied probability":63.0},{"price":64,"Maker bought YES":65.82,"Maker bought NO":64.96,"Implied probability":64.0},{"price":65,"Maker bought YES":66.09,"Maker bought NO":64.38,"Implied probability":65.0},{"price":66,"Maker bought YES":64.91,"Maker bought NO":62.55,"Implied probability":66.0},{"price":67,"Maker bought YES":66.86,"Maker bought NO":63.77,"Implied probability":67.0},{"price":68,"Maker bought YES":68.4,"Maker bought NO":64.16,"Implied probability":68.0},{"price":69,"Maker bought YES":71.69,"Maker bought NO":71.65,"Implied probability":69.0},{"price":70,"Maker bought YES":68.57,"Maker bought NO":70.23,"Implied probability":70.0},{"price":71,"Maker bought YES":70.32,"Maker bought NO":70.35,"Implied probability":71.0},{"price":72,"Maker bought YES":73.19,"Maker bought NO":72.28,"Implied probability":72.0},{"price":73,"Maker bought YES":75.26,"Maker bought NO":74.84,"Implied probability":73.0},{"price":74,"Maker bought YES":78.79,"Maker bought NO":77.06,"Implied probability":74.0},{"price":75,"Maker bought YES":75.24,"Maker bought NO":78.11,"Implied probability":75.0},{"price":76,"Maker bought YES":79.14,"Maker bought NO":78.25,"Implied probability":76.0},{"price":77,"Maker bought YES":79.83,"Maker bought NO":77.02,"Implied probability":77.0},{"price":78,"Maker bought YES":77.36,"Maker bought NO":74.12,"Implied probability":78.0},{"price":79,"Maker bought YES":80.23,"Maker bought NO":76.58,"Implied probability":79.0},{"price":80,"Maker bought YES":82.54,"Maker bought NO":80.78,"Implied probability":80.0},{"price":81,"Maker bought YES":83.32,"Maker bought NO":83.26,"Implied probability":81.0},{"price":82,"Maker bought YES":85.57,"Maker bought NO":85.0,"Implied probability":82.0},{"price":83,"Maker bought YES":86.99,"Maker bought NO":84.91,"Implied probability":83.0},{"price":84,"Maker bought YES":87.08,"Maker bought NO":86.01,"Implied probability":84.0},{"price":85,"Maker bought YES":87.49,"Maker bought NO":87.86,"Implied probability":85.0},{"price":86,"Maker bought YES":88.05,"Maker bought NO":87.14,"Implied probability":86.0},{"price":87,"Maker bought YES":89.7,"Maker bought NO":88.71,"Implied probability":87.0},{"price":88,"Maker bought YES":90.29,"Maker bought NO":91.09,"Implied probability":88.0},{"price":89,"Maker bought YES":91.13,"Maker bought NO":92.54,"Implied probability":89.0},{"price":90,"Maker bought YES":91.9,"Maker bought NO":92.77,"Implied probability":90.0},{"price":91,"Maker bought YES":93.29,"Maker bought NO":93.46,"Implied probability":91.0},{"price":92,"Maker bought YES":94.16,"Maker bought NO":94.33,"Implied probability":92.0},{"price":93,"Maker bought YES":95.48,"Maker bought NO":95.64,"Implied probability":93.0},{"price":94,"Maker bought YES":95.77,"Maker bought NO":96.91,"Implied probability":94.0},{"price":95,"Maker bought YES":96.66,"Maker bought NO":97.2,"Implied probability":95.0},{"price":96,"Maker bought YES":97.35,"Maker bought NO":97.85,"Implied probability":96.0},{"price":97,"Maker bought YES":98.74,"Maker bought NO":98.55,"Implied probability":97.0},{"price":98,"Maker bought YES":98.01,"Maker bought NO":99.27,"Implied probability":98.0},{"price":99,"Maker bought YES":98.87,"Maker bought NO":99.51,"Implied probability":99.0}],"xKey":"price","yKeys":["Maker bought YES","Maker bought NO","Implied probability"],"title":"Maker Win Rate by Position Direction","yUnit":"percent","strokeDasharrays":[null,null,"5 5"],"xLabel":"Maker's Purchase Price (cents)","yLabel":"Win Rate (%)"},{"type":"treemap","data":[{"name":"Sports","value":13207722950,"children":[{"name":"NFL","value":3790996177,"children":[{"name":"Games","value":3017237118},{"name":"Spreads","value":247733494},{"name":"Totals","value":138285716},{"name":"Multi-Game Props","value":124661080},{"name":"Super Bowl","value":76199250},{"name":"Single-Game Props","value":64963059}]},{"name":"NCAA Football","value":2950704048,"children":[{"name":"Games","value":2799948915},{"name":"Spreads","value":62447730},{"name":"Totals","value":40371510}]},{"name":"NBA","value":2140857369,"children":[{"name":"Games","value":1769702380},{"name":"Other NBA","value":146293425},{"name":"Series","value":109347734},{"name":"Totals","value":26017335},{"name":"Eastern Conf","value":23943942},{"name":"Western Conf","value":22623848}]},{"name":"MLB","value":1106021157,"children":[{"name":"Games","value":865058318},{"name":"Other MLB","value":90597476},{"name":"Series","value":66572894},{"name":"American League","value":29165417},{"name":"HR Derby","value":15967466},{"name":"National League","value":14230740},{"name":"All-Star Game","value":11380418}]},{"name":"Tennis","value":1031304718,"children":[{"name":"ATP Matches","value":454928345},{"name":"WTA Matches","value":347409146},{"name":"Wimbledon M","value":47419000},{"name":"US Open M","value":35458687},{"name":"French Open M","value":31816184},{"name":"French Open W","value":22598170},{"name":"French Open","value":21123935},{"name":"US Open W","value":20050935},{"name":"Wimbledon W","value":19616103}]},{"name":"NCAA Basketball","value":706028848,"children":[{"name":"March Madness M","value":507406745},{"name":"Games","value":176896632},{"name":"Totals","value":7868762},{"name":"Spreads","value":7456770}]},{"name":"Golf","value":519944119,"children":[{"name":"PGA Tour","value":231000998},{"name":"Masters","value":86876354},{"name":"US Open","value":71009638},{"name":"The Open","value":45869851},{"name":"Other PGA","value":38816215},{"name":"Ryder Cup","value":22566406},{"name":"Ryder Cup Match","value":21750933}]},{"name":"NHL","value":394541367,"children":[{"name":"Games","value":344058272},{"name":"Series","value":19426429},{"name":"Other NHL","value":16680955},{"name":"Totals","value":6035454}]},{"name":"Soccer","value":361480542,"children":[{"name":"EPL Games","value":133683762},{"name":"UCL Games","value":78565663},{"name":"FIFA Games","value":23211654},{"name":"La Liga Games","value":19959835},{"name":"MLS Games","value":19479405},{"name":"Club WC Games","value":16123943},{"name":"Serie A Games","value":13517280},{"name":"Ligue 1 Games","value":9960954},{"name":"Bundesliga Games","value":9449715},{"name":"UEFA CL","value":6763050},{"name":"Premier League","value":5741358},{"name":"Euroleague","value":4647294},{"name":"Brasileirao","value":3903991}]},{"name":"UFC/Boxing","value":132261954,"children":[{"name":"UFC Fights","value":103744086},{"name":"Boxing","value":26365329},{"name":"Other UFC","value":2152539}]}]},{"name":"Politics","value":2447975945,"children":[{"name":"Presidential","value":789917299,"children":[{"name":"General","value":789917299}]},{"name":"Electoral College","value":578139603,"children":[{"name":"Other","value":449930258},{"name":"Margin","value":86308117},{"name":"Closest State","value":25934826},{"name":"Swing States DJT","value":10231804}]},{"name":"Popular Vote","value":383443392,"children":[{"name":"Margin","value":294162474},{"name":"Winner","value":83762785},{"name":"KH Margin","value":5518133}]},{"name":"NYC Mayor","value":147296546,"children":[{"name":"Party","value":121642553},{"name":"Nominations","value":16963803},{"name":"2nd Round","value":4967665},{"name":"D Round","value":2125738},{"name":"Debate Mentions","value":1578656}]},{"name":"Other Politics","value":103687398,"children":[{"name":"Power","value":28568811},{"name":"EO Count Day 1","value":11701421},{"name":"Inauguration","value":6650681},{"name":"State Deep DJT","value":6143975},{"name":"Cuomo Dropout","value":6128407},{"name":"Dem Sweep","value":3999435},{"name":"TikTok Ban","value":3907027},{"name":"EO Count Day 2","value":3896884},{"name":"WI SCOTUS","value":3571663},{"name":"Speaker","value":3007371},{"name":"World Leader","value":2656694},{"name":"EO Week","value":2503837},{"name":"Leave Admin","value":2356242},{"name":"Debates 2024","value":2352425},{"name":"Gabbard Count","value":2036501},{"name":"Greenland","value":1989254},{"name":"WI Court Margin","value":1757073},{"name":"Rubio","value":1668217},{"name":"RFK Count","value":1471989},{"name":"EO Count Day 3","value":1447919},{"name":"Leader Out","value":1438858},{"name":"Mamdani Mentions","value":1218374},{"name":"Patel Count","value":1171428},{"name":"Jan 6 Pardon Day 1","value":1044957}]},{"name":"Government","value":101373311,"children":[{"name":"Shutdown Length","value":83205234},{"name":"Shutdown","value":8370121},{"name":"Cuts","value":5592207},{"name":"Reopen 2025","value":4205749}]},{"name":"Senate","value":84205131,"children":[{"name":"Arizona","value":35499031},{"name":"Margin","value":9085904},{"name":"Majority","value":6603809},{"name":"R Seats","value":6205451},{"name":"Nevada","value":5434688},{"name":"Texas","value":4936503},{"name":"Pennsylvania","value":3917206},{"name":"Other","value":2965652},{"name":"Ohio","value":2820514},{"name":"Nebraska","value":1487626},{"name":"Wisconsin","value":1476144},{"name":"Florida","value":1427473},{"name":"Michigan","value":1340222},{"name":"Medicare","value":1004908}]},{"name":"Trump Admin","value":78320479,"children":[{"name":"Mentions","value":28555066},{"name":"Joint Session","value":13744260},{"name":"Pardons","value":8664486},{"name":"Out","value":8491229},{"name":"Statements","value":4895542},{"name":"Officials","value":4125812},{"name":"Other","value":4118244},{"name":"Putin","value":1693899},{"name":"Meetings","value":1518357},{"name":"Attendance","value":1257249},{"name":"Tariffs Vote","value":1256335}]},{"name":"Other Elections","value":43979678,"children":[{"name":"Other","value":13438136},{"name":"RFK","value":6485808},{"name":"Mamdani %","value":5393529},{"name":"Patel","value":3034138},{"name":"VA Attorney General","value":2847040},{"name":"Seattle Mayor","value":2600292},{"name":"Hegseth","value":2417398},{"name":"Cuomo %","value":1831385},{"name":"Sliwa %","value":1718346},{"name":"Other Mayor","value":1624210},{"name":"Minneapolis Mayor","value":1504148},{"name":"Jersey Mayor","value":1085248}]},{"name":"House","value":37061283,"children":[{"name":"Margin","value":16252923},{"name":"R Seats","value":9824620},{"name":"Control House","value":4668201},{"name":"Other","value":4006035},{"name":"Control Senate","value":2309504}]},{"name":"Governor","value":32773196,"children":[{"name":"New Jersey","value":21640003},{"name":"Virginia","value":5610201},{"name":"Other","value":5522992}]},{"name":"Cabinet","value":30024566,"children":[{"name":"Musk","value":6808311},{"name":"DNI","value":5775465},{"name":"Dept of Education","value":3934156},{"name":"FBI","value":3925710},{"name":"RFK","value":3492893},{"name":"Out","value":2497081},{"name":"Count","value":1856470},{"name":"Tulsi","value":1390634},{"name":"Other","value":343846}]}]},{"name":"Crypto","value":845488438,"children":[{"name":"Bitcoin","value":702892202,"children":[{"name":"Daily","value":474291861},{"name":"Price","value":152001447},{"name":"Max Yearly","value":26646742},{"name":"Max 150K","value":15008499},{"name":"Max 125K","value":14561675},{"name":"Min Yearly","value":12798089}]},{"name":"Ethereum","value":132687230,"children":[{"name":"Daily","value":63794736},{"name":"Price","value":46724484},{"name":"Max Yearly","value":16018255},{"name":"Min Yearly","value":6149755}]},{"name":"Other Crypto","value":9909006,"children":[{"name":"Doge","value":4730343},{"name":"Doge Daily","value":1768604},{"name":"XRP","value":1551506},{"name":"Shiba","value":1030047},{"name":"Solana","value":547803},{"name":"Coinbase","value":280703}]}]},{"name":"Finance","value":756526684,"children":[{"name":"S&P 500","value":292323093,"children":[{"name":"Up","value":119628727},{"name":"Daily","value":70659400},{"name":"Other","value":65375161},{"name":"Yearly","value":24449465},{"name":"Weekly","value":12210340}]},{"name":"NASDAQ","value":204670474,"children":[{"name":"Up","value":67377977},{"name":"Daily","value":56913855},{"name":"Other","value":39489871},{"name":"Yearly","value":30293259},{"name":"Weekly","value":10595512}]},{"name":"Economic Indicators","value":78126566,"children":[{"name":"CPI YoY","value":24090606},{"name":"CPI","value":19064341},{"name":"Payrolls","value":11918552},{"name":"GDP","value":10618882},{"name":"Unemployment","value":6326345},{"name":"CPI Core","value":4337572},{"name":"CPI Core YoY","value":1770268}]},{"name":"Fed","value":63210989,"children":[{"name":"Other","value":42984343},{"name":"Leave Powell","value":7654168},{"name":"Mentions","value":5243591},{"name":"Chair Nomination","value":3232237},{"name":"Powell Mentions","value":1680603},{"name":"Employees","value":1412742},{"name":"Terminal Rate","value":1003305}]},{"name":"Commodities","value":46035388,"children":[{"name":"Gas Monthly","value":37169443},{"name":"WTI Oil","value":2983130},{"name":"Gas Weekly","value":2202304},{"name":"Gas","value":1930363},{"name":"Eggs","value":1748450}]},{"name":"Other Finance","value":27464464,"children":[{"name":"Shutdown By","value":8479330},{"name":"IPOs","value":3569828},{"name":"Tesla","value":2653173},{"name":"Debt Shrink","value":2351449},{"name":"Gold Cards","value":2194868},{"name":"Gambling Repeal","value":2060682},{"name":"Musk Party","value":1570847},{"name":"TSLA Earnings","value":1303691},{"name":"Expand","value":1203259},{"name":"Deport Count","value":1075643},{"name":"Waymo Cities","value":1001694}]},{"name":"Bonds","value":18373895,"children":[{"name":"T-Note Weekly","value":10354717},{"name":"T-Note Daily","value":6031413},{"name":"Debt Ceiling","value":1836102}]},{"name":"Forex","value":17883544,"children":[{"name":"USD/JPY","value":9257271},{"name":"EUR/USD","value":4271285},{"name":"EUR/USD Hourly","value":2679473},{"name":"USD/JPY Hourly","value":1675515}]},{"name":"Tariffs","value":8438271,"children":[{"name":"General","value":6656201},{"name":"FTA Countries","value":1782070}]}]},{"name":"Weather","value":283556724,"children":[{"name":"High Temp","value":267922512,"children":[{"name":"New York","value":61923446},{"name":"Chicago","value":48772167},{"name":"Austin","value":42939557},{"name":"Miami","value":32704470},{"name":"Los Angeles","value":27143770},{"name":"Denver","value":26240336},{"name":"Philadelphia","value":17323010},{"name":"Houston","value":6416018},{"name":"Monthly","value":3163360}]},{"name":"Precipitation","value":11302783,"children":[{"name":"NYC Rain","value":4852137},{"name":"Other Snow","value":2487801},{"name":"Other Rain","value":2100461},{"name":"NYC Snow Monthly","value":1862384}]},{"name":"Severe Weather","value":3743493,"children":[{"name":"Tornado","value":2235882},{"name":"Hurricane","value":1507611}]}]},{"name":"Entertainment","value":209134404,"children":[{"name":"Movies","value":86331404,"children":[{"name":"Rotten Tomatoes","value":63351048},{"name":"Captain America","value":2405348},{"name":"Moana 2","value":2230769},{"name":"Mickey 17","value":2077029},{"name":"Mufasa","value":1881390},{"name":"The Monkey","value":1752423},{"name":"Wicked","value":1639156},{"name":"Novocaine","value":1626469},{"name":"Fantastic Four","value":1588271},{"name":"Wicked For Good","value":1567449},{"name":"Nosferatu","value":1499085},{"name":"Superman","value":1327939},{"name":"Dog Man","value":1258789},{"name":"Last Breath","value":1102894},{"name":"Jurassic World","value":1023345}]},{"name":"Awards","value":42273624,"children":[{"name":"Other Oscar","value":10390361},{"name":"Oscar Best Picture","value":7286303},{"name":"Oscar Nom Picture","value":3394728},{"name":"Other Emmy","value":3339482},{"name":"Game Awards","value":3293585},{"name":"Emmy Drama","value":3207909},{"name":"Oscar Actor","value":1974451},{"name":"Other Grammy","value":1968128},{"name":"Grammy SOTY","value":1830729},{"name":"Oscar Actress","value":1792288},{"name":"Grammy AOTY","value":1728804},{"name":"Oscar Nom Actress","value":1573802},{"name":"BAFTA","value":493054}]},{"name":"Spotify","value":28959766,"children":[{"name":"Daily","value":19126567},{"name":"Other","value":4803752},{"name":"Songs Opalite","value":2219860},{"name":"2-Day","value":1537055},{"name":"Global Daily","value":1272532}]},{"name":"TV/Media","value":17660135,"children":[{"name":"Super Bowl Headlines","value":4813533},{"name":"SNF Mentions","value":4090383},{"name":"TNF Mentions","value":3402902},{"name":"South Park Mentions","value":2290076},{"name":"Kimmel Mentions","value":1594302},{"name":"MrBeast Mentions","value":1468939}]},{"name":"Other Entertainment","value":14899957,"children":[{"name":"Time","value":5644324},{"name":"App Rank Free","value":4855665},{"name":"Top Model","value":3086258},{"name":"GTA 6","value":1200534}]},{"name":"Music","value":13493536,"children":[{"name":"Billboard Top 10 TS","value":3634317},{"name":"Top Album","value":3102357},{"name":"Taylor Swift Mentions","value":2936480},{"name":"Top Song","value":1583276},{"name":"Most Streamed TS","value":1241951},{"name":"Billboard","value":995155}]},{"name":"Netflix","value":5515982,"children":[{"name":"Movie Rank","value":3018551},{"name":"Show Rank","value":2423488},{"name":"Other","value":73943}]}]},{"name":"Other","value":159513232,"children":[{"name":"Other","value":159513232,"children":[{"name":"KXLSUCOACH","value":1683420},{"name":"KXFLACOACH","value":1665334}]}]},{"name":"Esports","value":74527052,"children":[{"name":"Multi-Game","value":57434751,"children":[{"name":"Extended Props","value":57434751}]},{"name":"League of Legends","value":12410678,"children":[{"name":"Games","value":5492191},{"name":"Worlds","value":5046794},{"name":"Maps","value":1871693}]},{"name":"CS:GO","value":3277412,"children":[{"name":"Games","value":3277412}]},{"name":"Other Esports","value":1404211,"children":[{"name":"Internet Invitational","value":1404211}]}]},{"name":"Media","value":51228038,"children":[{"name":"Mentions","value":24304600,"children":[{"name":"General","value":22975255},{"name":"Vance","value":1329345}]},{"name":"Search Trends","value":9617205,"children":[{"name":"Google Search","value":8623692},{"name":"Song Thriller","value":993513}]},{"name":"Other Media","value":8935779,"children":[{"name":"TSAW","value":5113053},{"name":"UFSD","value":1798253},{"name":"Case M","value":1030488},{"name":"Case D","value":993985}]},{"name":"Polls","value":8368970,"children":[{"name":"538 Approve","value":5008176},{"name":"Approve POTUS","value":3360794}]}]},{"name":"World Events","value":42483274,"children":[{"name":"Other Events","value":19067711,"children":[{"name":"Epstein","value":7478102},{"name":"Epstein Bill","value":3079100},{"name":"Epstein List","value":2441839},{"name":"Arrests","value":2342424},{"name":"Lagos Days","value":1462656},{"name":"OTE Epstein","value":1250350},{"name":"Zelensky Putin Meet","value":1013240}]},{"name":"Nobel Prize","value":12123979,"children":[{"name":"Peace","value":12076482}]},{"name":"Religion","value":11291584,"children":[{"name":"Next Pope","value":10618819},{"name":"Pope","value":672765}]}]},{"name":"Science/Tech","value":35169395,"children":[{"name":"AI","value":24623502,"children":[{"name":"LLM Benchmark","value":17256618},{"name":"Other AI","value":6891566},{"name":"LLM","value":475318}]},{"name":"Tech","value":5451653,"children":[{"name":"CEO Astronomer","value":2415264},{"name":"Leave Lisa Cook","value":2197383},{"name":"Apple","value":839006}]},{"name":"Space","value":5094240,"children":[{"name":"SpaceX Starship","value":2542790},{"name":"Aliens","value":1886612},{"name":"SpaceX","value":664838}]}]}],"title":"Notional Volume by Market Category","nameKey":"name","valueKey":"value","childrenKey":"children","yUnit":"dollars","caption":"Total Notional Volume on Kalshi by Market Category and Subcategory. Click to zoom in."},{"type":"line","data":[{"price":1,"Taker":-0.57,"Maker":0.57,"Combined":-0.09},{"price":2,"Taker":-0.84,"Maker":0.56,"Combined":-0.1},{"price":3,"Taker":-1.23,"Maker":0.72,"Combined":-0.29},{"price":4,"Taker":-1.52,"Maker":0.54,"Combined":-0.55},{"price":5,"Taker":-1.55,"Maker":-0.0,"Combined":-0.82},{"price":6,"Taker":-2.06,"Maker":0.02,"Combined":-1.08},{"price":7,"Taker":-2.28,"Maker":0.07,"Combined":-1.21},{"price":8,"Taker":-2.03,"Maker":0.21,"Combined":-1.03},{"price":9,"Taker":-2.25,"Maker":0.11,"Combined":-1.22},{"price":10,"Taker":-2.18,"Maker":0.2,"Combined":-1.09},{"price":11,"Taker":-2.27,"Maker":0.26,"Combined":-1.07},{"price":12,"Taker":-2.08,"Maker":0.38,"Combined":-0.89},{"price":13,"Taker":-1.21,"Maker":0.06,"Combined":-0.63},{"price":14,"Taker":-1.42,"Maker":-0.62,"Combined":-1.05},{"price":15,"Taker":-2.22,"Maker":0.23,"Combined":-1.08},{"price":16,"Taker":-1.73,"Maker":0.34,"Combined":-0.74},{"price":17,"Taker":-1.68,"Maker":-0.51,"Combined":-1.16},{"price":18,"Taker":-2.3,"Maker":0.05,"Combined":-1.23},{"price":19,"Taker":-2.13,"Maker":-0.08,"Combined":-1.19},{"price":20,"Taker":-1.16,"Maker":2.85,"Combined":0.81},{"price":21,"Taker":0.3,"Maker":3.17,"Combined":1.7},{"price":22,"Taker":1.59,"Maker":-0.27,"Combined":0.73},{"price":23,"Taker":-1.73,"Maker":-1.38,"Combined":-1.57},{"price":24,"Taker":-2.56,"Maker":-1.78,"Combined":-2.2},{"price":25,"Taker":-2.54,"Maker":-1.2,"Combined":-1.89},{"price":26,"Taker":-3.11,"Maker":-0.62,"Combined":-1.89},{"price":27,"Taker":-2.81,"Maker":0.4,"Combined":-1.29},{"price":28,"Taker":-1.37,"Maker":3.58,"Combined":0.91},{"price":29,"Taker":-0.45,"Maker":0.61,"Combined":0.03},{"price":30,"Taker":-1.27,"Maker":1.14,"Combined":-0.11},{"price":31,"Taker":-2.71,"Maker":3.82,"Combined":0.44},{"price":32,"Taker":1.93,"Maker":2.86,"Combined":2.38},{"price":33,"Taker":0.94,"Maker":2.7,"Combined":1.78},{"price":34,"Taker":1.23,"Maker":3.2,"Combined":2.16},{"price":35,"Taker":-0.1,"Maker":0.25,"Combined":0.08},{"price":36,"Taker":-0.3,"Maker":-0.28,"Combined":-0.29},{"price":37,"Taker":-0.22,"Maker":2.2,"Combined":0.96},{"price":38,"Taker":-2.04,"Maker":3.5,"Combined":0.69},{"price":39,"Taker":-1.88,"Maker":1.51,"Combined":-0.31},{"price":40,"Taker":-1.55,"Maker":1.66,"Combined":0.04},{"price":41,"Taker":-1.66,"Maker":0.81,"Combined":-0.34},{"price":42,"Taker":-2.84,"Maker":-1.05,"Combined":-1.88},{"price":43,"Taker":-3.41,"Maker":-0.95,"Combined":-2.18},{"price":44,"Taker":-3.73,"Maker":1.02,"Combined":-1.42},{"price":45,"Taker":-2.24,"Maker":0.32,"Combined":-0.94},{"price":46,"Taker":-0.84,"Maker":1.04,"Combined":0.11},{"price":47,"Taker":-2.48,"Maker":-0.98,"Combined":-1.71},{"price":48,"Taker":-2.42,"Maker":-0.57,"Combined":-1.53},{"price":49,"Taker":-2.81,"Maker":0.66,"Combined":-1.1},{"price":50,"Taker":-1.32,"Maker":1.33,"Combined":0.0},{"price":51,"Taker":-0.66,"Maker":2.81,"Combined":1.1},{"price":52,"Taker":0.57,"Maker":2.41,"Combined":1.53},{"price":53,"Taker":0.97,"Maker":2.48,"Combined":1.72},{"price":54,"Taker":-1.04,"Maker":0.84,"Combined":-0.11},{"price":55,"Taker":-0.32,"Maker":2.24,"Combined":0.95},{"price":56,"Taker":-1.02,"Maker":3.73,"Combined":1.43},{"price":57,"Taker":0.95,"Maker":3.4,"Combined":2.18},{"price":58,"Taker":1.05,"Maker":2.84,"Combined":1.88},{"price":59,"Taker":-0.81,"Maker":1.66,"Combined":0.34},{"price":60,"Taker":-1.66,"Maker":1.55,"Combined":-0.04},{"price":61,"Taker":-1.52,"Maker":1.89,"Combined":0.31},{"price":62,"Taker":-3.49,"Maker":2.05,"Combined":-0.68},{"price":63,"Taker":-2.2,"Maker":0.21,"Combined":-0.97},{"price":64,"Taker":0.28,"Maker":0.3,"Combined":0.29},{"price":65,"Taker":-0.25,"Maker":0.1,"Combined":-0.08},{"price":66,"Taker":-3.2,"Maker":-1.23,"Combined":-2.16},{"price":67,"Taker":-2.7,"Maker":-0.94,"Combined":-1.78},{"price":68,"Taker":-2.86,"Maker":-1.92,"Combined":-2.37},{"price":69,"Taker":-3.82,"Maker":2.7,"Combined":-0.44},{"price":70,"Taker":-1.14,"Maker":1.27,"Combined":0.11},{"price":71,"Taker":-0.62,"Maker":0.47,"Combined":-0.03},{"price":72,"Taker":-3.57,"Maker":1.37,"Combined":-0.91},{"price":73,"Taker":-0.4,"Maker":2.8,"Combined":1.28},{"price":74,"Taker":0.62,"Maker":3.12,"Combined":1.89},{"price":75,"Taker":1.2,"Maker":2.55,"Combined":1.89},{"price":76,"Taker":1.78,"Maker":2.58,"Combined":2.21},{"price":77,"Taker":1.38,"Maker":1.73,"Combined":1.57},{"price":78,"Taker":0.27,"Maker":-1.6,"Combined":-0.73},{"price":79,"Taker":-3.17,"Maker":-0.29,"Combined":-1.69},{"price":80,"Taker":-2.85,"Maker":1.15,"Combined":-0.81},{"price":81,"Taker":0.08,"Maker":2.14,"Combined":1.2},{"price":82,"Taker":-0.05,"Maker":2.31,"Combined":1.23},{"price":83,"Taker":0.51,"Maker":1.68,"Combined":1.16},{"price":84,"Taker":-0.34,"Maker":1.73,"Combined":0.74},{"price":85,"Taker":-0.23,"Maker":2.23,"Combined":1.08},{"price":86,"Taker":0.62,"Maker":1.41,"Combined":1.05},{"price":87,"Taker":-0.06,"Maker":1.22,"Combined":0.63},{"price":88,"Taker":-0.38,"Maker":2.08,"Combined":0.9},{"price":89,"Taker":-0.26,"Maker":2.29,"Combined":1.08},{"price":90,"Taker":-0.2,"Maker":2.2,"Combined":1.1},{"price":91,"Taker":-0.11,"Maker":2.26,"Combined":1.22},{"price":92,"Taker":-0.21,"Maker":2.04,"Combined":1.03},{"price":93,"Taker":-0.07,"Maker":2.29,"Combined":1.21},{"price":94,"Taker":-0.02,"Maker":2.07,"Combined":1.09},{"price":95,"Taker":0.0,"Maker":1.56,"Combined":0.83},{"price":96,"Taker":-0.54,"Maker":1.53,"Combined":0.56},{"price":97,"Taker":-0.72,"Maker":1.24,"Combined":0.3},{"price":98,"Taker":-0.56,"Maker":0.86,"Combined":0.12},{"price":99,"Taker":-0.57,"Maker":0.58,"Combined":0.09}],"xKey":"price","yKeys":["Taker","Maker","Combined"],"title":"Mispricing by Contract Price","yUnit":"percent","colors":{"Taker":"#ef4444","Maker":"#10b981","Combined":"#6366f1"},"xLabel":"Contract Price (cents)","yLabel":"Mispricing (pp)"},{"type":"bar","data":[{"hour":0,"Excess Return":-1.19},{"hour":1,"Excess Return":-0.99},{"hour":2,"Excess Return":-1.61},{"hour":3,"Excess Return":-1.73},{"hour":4,"Excess Return":-2.13},{"hour":5,"Excess Return":-1.65},{"hour":6,"Excess Return":-1.71},{"hour":7,"Excess Return":-1.49},{"hour":8,"Excess Return":-0.92},{"hour":9,"Excess Return":-0.63},{"hour":10,"Excess Return":-0.83},{"hour":11,"Excess Return":-0.89},{"hour":12,"Excess Return":-0.79},{"hour":13,"Excess Return":-0.98},{"hour":14,"Excess Return":-1.21},{"hour":15,"Excess Return":-0.75},{"hour":16,"Excess Return":-0.97},{"hour":17,"Excess Return":-1.11},{"hour":18,"Excess Return":-1.27},{"hour":19,"Excess Return":-0.89},{"hour":20,"Excess Return":-1.32},{"hour":21,"Excess Return":-1.38},{"hour":22,"Excess Return":-1.14},{"hour":23,"Excess Return":-1.4}],"xKey":"hour","yKeys":["Excess Return"],"title":"Excess Return by Hour of Day (ET)","yUnit":"percent"},{"type":"bar","data":[{"role":"Taker","Mean":120.31,"Median":13.68},{"role":"Maker","Mean":133.95,"Median":15.75}],"xKey":"role","yKeys":["Mean","Median"],"title":"Trade Size Statistics by Role","yUnit":"dollars","xLabel":"Role","yLabel":"Trade Size (USD)"},{"type":"bar","data":[{"quarter":"Q2 '21","volume":5},{"quarter":"Q3 '21","volume":3854589},{"quarter":"Q4 '21","volume":6502670},{"quarter":"Q1 '22","volume":8069947},{"quarter":"Q2 '22","volume":20319677},{"quarter":"Q3 '22","volume":27127516},{"quarter":"Q4 '22","volume":20847820},{"quarter":"Q1 '23","volume":19987630},{"quarter":"Q2 '23","volume":51643432},{"quarter":"Q3 '23","volume":51209903},{"quarter":"Q4 '23","volume":60264971},{"quarter":"Q1 '24","volume":65580029},{"quarter":"Q2 '24","volume":93337311},{"quarter":"Q3 '24","volume":74493617},{"quarter":"Q4 '24","volume":1721115529},{"quarter":"Q1 '25","volume":885610862},{"quarter":"Q2 '25","volume":1904258411},{"quarter":"Q3 '25","volume":4477100402},{"quarter":"Q4 '25","volume":8773548756}],"xKey":"quarter","yKeys":["volume"],"title":"Kalshi Quarterly Volume","yScale":"log","yUnit":"dollars","xLabel":"Quarter","yLabel":"Volume (USD)"},{"type":"line","data":[{"hour":0,"VWAP":47.5},{"hour":1,"VWAP":46.24},{"hour":2,"VWAP":46.03},{"hour":3,"VWAP":45.55},{"hour":4,"VWAP":47.63},{"hour":5,"VWAP":40.48},{"hour":6,"VWAP":46.34},{"hour":7,"VWAP":47.94},{"hour":8,"VWAP":47.97},{"hour":9,"VWAP":47.38},{"hour":10,"VWAP":47.77},{"hour":11,"VWAP":48.0},{"hour":12,"VWAP":47.3},{"hour":13,"VWAP":45.77},{"hour":14,"VWAP":46.87},{"hour":15,"VWAP":46.48},{"hour":16,"VWAP":47.72},{"hour":17,"VWAP":48.0},{"hour":18,"VWAP":46.92},{"hour":19,"VWAP":47.95},{"hour":20,"VWAP":47.46},{"hour":21,"VWAP":47.35},{"hour":22,"VWAP":47.36},{"hour":23,"VWAP":48.46}],"xKey":"hour","yKeys":["VWAP"],"title":"Volume-Weighted Average Price by Hour of Day (ET)","yUnit":"cents"},{"type":"line","data":[{"price":1,"actual":0.91,"implied":1},{"price":2,"actual":1.9,"implied":2},{"price":3,"actual":2.71,"implied":3},{"price":4,"actual":3.45,"implied":4},{"price":5,"actual":4.18,"implied":5},{"price":6,"actual":4.92,"implied":6},{"price":7,"actual":5.79,"implied":7},{"price":8,"actual":6.97,"implied":8},{"price":9,"actual":7.78,"implied":9},{"price":10,"actual":8.91,"implied":10},{"price":11,"actual":9.93,"implied":11},{"price":12,"actual":11.11,"implied":12},{"price":13,"actual":12.37,"implied":13},{"price":14,"actual":12.95,"implied":14},{"price":15,"actual":13.92,"implied":15},{"price":16,"actual":15.26,"implied":16},{"price":17,"actual":15.84,"implied":17},{"price":18,"actual":16.77,"implied":18},{"price":19,"actual":17.81,"implied":19},{"price":20,"actual":20.81,"implied":20},{"price":21,"actual":22.7,"implied":21},{"price":22,"actual":22.73,"implied":22},{"price":23,"actual":21.43,"implied":23},{"price":24,"actual":21.8,"implied":24},{"price":25,"actual":23.11,"implied":25},{"price":26,"actual":24.11,"implied":26},{"price":27,"actual":25.71,"implied":27},{"price":28,"actual":28.91,"implied":28},{"price":29,"actual":29.03,"implied":29},{"price":30,"actual":29.89,"implied":30},{"price":31,"actual":31.44,"implied":31},{"price":32,"actual":34.38,"implied":32},{"price":33,"actual":34.78,"implied":33},{"price":34,"actual":36.16,"implied":34},{"price":35,"actual":35.08,"implied":35},{"price":36,"actual":35.71,"implied":36},{"price":37,"actual":37.96,"implied":37},{"price":38,"actual":38.69,"implied":38},{"price":39,"actual":38.69,"implied":39},{"price":40,"actual":40.04,"implied":40},{"price":41,"actual":40.66,"implied":41},{"price":42,"actual":40.12,"implied":42},{"price":43,"actual":40.82,"implied":43},{"price":44,"actual":42.58,"implied":44},{"price":45,"actual":44.06,"implied":45},{"price":46,"actual":46.11,"implied":46},{"price":47,"actual":45.29,"implied":47},{"price":48,"actual":46.47,"implied":48},{"price":49,"actual":47.9,"implied":49},{"price":50,"actual":50.0,"implied":50},{"price":51,"actual":52.1,"implied":51},{"price":52,"actual":53.53,"implied":52},{"price":53,"actual":54.72,"implied":53},{"price":54,"actual":53.89,"implied":54},{"price":55,"actual":55.95,"implied":55},{"price":56,"actual":57.43,"implied":56},{"price":57,"actual":59.18,"implied":57},{"price":58,"actual":59.88,"implied":58},{"price":59,"actual":59.34,"implied":59},{"price":60,"actual":59.96,"implied":60},{"price":61,"actual":61.31,"implied":61},{"price":62,"actual":61.32,"implied":62},{"price":63,"actual":62.03,"implied":63},{"price":64,"actual":64.29,"implied":64},{"price":65,"actual":64.92,"implied":65},{"price":66,"actual":63.84,"implied":66},{"price":67,"actual":65.22,"implied":67},{"price":68,"actual":65.63,"implied":68},{"price":69,"actual":68.56,"implied":69},{"price":70,"actual":70.11,"implied":70},{"price":71,"actual":70.97,"implied":71},{"price":72,"actual":71.09,"implied":72},{"price":73,"actual":74.28,"implied":73},{"price":74,"actual":75.89,"implied":74},{"price":75,"actual":76.89,"implied":75},{"price":76,"actual":78.21,"implied":76},{"price":77,"actual":78.57,"implied":77},{"price":78,"actual":77.27,"implied":78},{"price":79,"actual":77.31,"implied":79},{"price":80,"actual":79.19,"implied":80},{"price":81,"actual":82.2,"implied":81},{"price":82,"actual":83.23,"implied":82},{"price":83,"actual":84.16,"implied":83},{"price":84,"actual":84.74,"implied":84},{"price":85,"actual":86.08,"implied":85},{"price":86,"actual":87.05,"implied":86},{"price":87,"actual":87.63,"implied":87},{"price":88,"actual":88.9,"implied":88},{"price":89,"actual":90.08,"implied":89},{"price":90,"actual":91.1,"implied":90},{"price":91,"actual":92.22,"implied":91},{"price":92,"actual":93.03,"implied":92},{"price":93,"actual":94.21,"implied":93},{"price":94,"actual":95.09,"implied":94},{"price":95,"actual":95.83,"implied":95},{"price":96,"actual":96.56,"implied":96},{"price":97,"actual":97.3,"implied":97},{"price":98,"actual":98.12,"implied":98},{"price":99,"actual":99.09,"implied":99}],"xKey":"price","yKeys":["actual","implied"],"title":"Actual Win Rate vs Contract Price","yUnit":"percent","strokeDasharrays":[null,"5 5"],"xLabel":"Contract Price (cents)","yLabel":"Actual Win Rate (%)"},{"type":"line","data":[{"trade_size":0.01,"Excess Win Rate":-0.11,"95% CI Lower":-0.16,"95% CI Upper":-0.07},{"trade_size":0.02,"Excess Win Rate":-0.87,"95% CI Lower":-0.94,"95% CI Upper":-0.81},{"trade_size":0.03,"Excess Win Rate":-1.13,"95% CI Lower":-1.21,"95% CI Upper":-1.04},{"trade_size":0.06,"Excess Win Rate":-1.58,"95% CI Lower":-1.65,"95% CI Upper":-1.5},{"trade_size":0.1,"Excess Win Rate":-1.47,"95% CI Lower":-1.54,"95% CI Upper":-1.4},{"trade_size":0.18,"Excess Win Rate":-1.22,"95% CI Lower":-1.28,"95% CI Upper":-1.15},{"trade_size":0.32,"Excess Win Rate":-1.2,"95% CI Lower":-1.26,"95% CI Upper":-1.14},{"trade_size":0.56,"Excess Win Rate":-1.16,"95% CI Lower":-1.2,"95% CI Upper":-1.13},{"trade_size":1.0,"Excess Win Rate":-1.24,"95% CI Lower":-1.28,"95% CI Upper":-1.19},{"trade_size":1.78,"Excess Win Rate":-1.38,"95% CI Lower":-1.41,"95% CI Upper":-1.34},{"trade_size":3.16,"Excess Win Rate":-1.38,"95% CI Lower":-1.41,"95% CI Upper":-1.34},{"trade_size":5.62,"Excess Win Rate":-1.26,"95% CI Lower":-1.29,"95% CI Upper":-1.23},{"trade_size":10.0,"Excess Win Rate":-1.08,"95% CI Lower":-1.11,"95% CI Upper":-1.05},{"trade_size":17.78,"Excess Win Rate":-1.2,"95% CI Lower":-1.23,"95% CI Upper":-1.17},{"trade_size":31.62,"Excess Win Rate":-1.02,"95% CI Lower":-1.05,"95% CI Upper":-0.98},{"trade_size":56.23,"Excess Win Rate":-1.03,"95% CI Lower":-1.07,"95% CI Upper":-1.0},{"trade_size":100.0,"Excess Win Rate":-0.87,"95% CI Lower":-0.91,"95% CI Upper":-0.83},{"trade_size":177.83,"Excess Win Rate":-0.85,"95% CI Lower":-0.9,"95% CI Upper":-0.81},{"trade_size":316.23,"Excess Win Rate":-0.79,"95% CI Lower":-0.85,"95% CI Upper":-0.74},{"trade_size":562.34,"Excess Win Rate":-0.52,"95% CI Lower":-0.59,"95% CI Upper":-0.44},{"trade_size":1000.0,"Excess Win Rate":-0.35,"95% CI Lower":-0.47,"95% CI Upper":-0.24},{"trade_size":1778.28,"Excess Win Rate":-0.37,"95% CI Lower":-0.5,"95% CI Upper":-0.25},{"trade_size":3162.28,"Excess Win Rate":-0.4,"95% CI Lower":-0.57,"95% CI Upper":-0.23},{"trade_size":5623.41,"Excess Win Rate":0.39,"95% CI Lower":0.15,"95% CI Upper":0.63},{"trade_size":10000.0,"Excess Win Rate":0.51,"95% CI Lower":0.04,"95% CI Upper":0.98},{"trade_size":17782.79,"Excess Win Rate":0.03,"95% CI Lower":-0.62,"95% CI Upper":0.68},{"trade_size":31622.78,"Excess Win Rate":0.4,"95% CI Lower":-0.66,"95% CI Upper":1.45},{"trade_size":56234.13,"Excess Win Rate":2.57,"95% CI Lower":0.8,"95% CI Upper":4.35},{"trade_size":100000.0,"Excess Win Rate":9.59,"95% CI Lower":5.95,"95% CI Upper":13.24},{"trade_size":177827.94,"Excess Win Rate":5.14,"95% CI Lower":1.83,"95% CI Upper":8.44},{"trade_size":316227.77,"Excess Win Rate":-0.46,"95% CI Lower":-4.43,"95% CI Upper":3.5},{"trade_size":562341.33,"Excess Win Rate":4.27,"95% CI Lower":-1.02,"95% CI Upper":9.56}],"xKey":"trade_size","yKeys":["Excess Win Rate","95% CI Lower","95% CI Upper"],"title":"Excess Win Rate by Trade Size","xScale":"log","yUnit":"percent","strokeDasharrays":[null,"5 5","5 5"],"colors":{"Excess Win Rate":"#4C72B0","95% CI Lower":"#4C72B0","95% CI Upper":"#4C72B0"}},{"type":"stacked-area-100","data":[{"price":1,"taker_yes":41.05,"maker_yes":23.69,"taker_no":23.37,"maker_no":11.89},{"price":2,"taker_yes":44.89,"maker_yes":24.29,"taker_no":13.29,"maker_no":17.53},{"price":3,"taker_yes":43.5,"maker_yes":23.3,"taker_no":17.76,"maker_no":15.44},{"price":4,"taker_yes":47.06,"maker_yes":22.7,"taker_no":12.77,"maker_no":17.47},{"price":5,"taker_yes":44.57,"maker_yes":23.01,"taker_no":11.95,"maker_no":20.47},{"price":6,"taker_yes":44.69,"maker_yes":22.03,"taker_no":11.24,"maker_no":22.04},{"price":7,"taker_yes":45.16,"maker_yes":20.68,"taker_no":11.8,"maker_no":22.36},{"price":8,"taker_yes":43.3,"maker_yes":20.41,"taker_no":11.98,"maker_no":24.32},{"price":9,"taker_yes":43.07,"maker_yes":19.97,"taker_no":12.27,"maker_no":24.69},{"price":10,"taker_yes":41.76,"maker_yes":20.98,"taker_no":12.58,"maker_no":24.68},{"price":11,"taker_yes":42.12,"maker_yes":20.48,"taker_no":11.03,"maker_no":26.36},{"price":12,"taker_yes":40.78,"maker_yes":19.83,"taker_no":10.83,"maker_no":28.56},{"price":13,"taker_yes":42.19,"maker_yes":18.98,"taker_no":11.88,"maker_no":26.95},{"price":14,"taker_yes":40.33,"maker_yes":19.06,"taker_no":11.43,"maker_no":29.18},{"price":15,"taker_yes":40.68,"maker_yes":19.85,"taker_no":12.16,"maker_no":27.32},{"price":16,"taker_yes":40.49,"maker_yes":18.89,"taker_no":11.02,"maker_no":29.6},{"price":17,"taker_yes":42.7,"maker_yes":18.12,"taker_no":12.13,"maker_no":27.06},{"price":18,"taker_yes":41.12,"maker_yes":18.33,"taker_no":11.62,"maker_no":28.93},{"price":19,"taker_yes":39.92,"maker_yes":17.5,"taker_no":11.83,"maker_no":30.75},{"price":20,"taker_yes":37.42,"maker_yes":17.97,"taker_no":12.57,"maker_no":32.04},{"price":21,"taker_yes":38.46,"maker_yes":17.37,"taker_no":11.08,"maker_no":33.09},{"price":22,"taker_yes":40.72,"maker_yes":17.14,"taker_no":11.1,"maker_no":31.04},{"price":23,"taker_yes":41.23,"maker_yes":16.46,"taker_no":11.1,"maker_no":31.2},{"price":24,"taker_yes":40.75,"maker_yes":16.94,"taker_no":11.21,"maker_no":31.1},{"price":25,"taker_yes":39.91,"maker_yes":17.74,"taker_no":11.94,"maker_no":30.42},{"price":26,"taker_yes":39.09,"maker_yes":16.98,"taker_no":11.08,"maker_no":32.85},{"price":27,"taker_yes":40.82,"maker_yes":14.77,"taker_no":11.43,"maker_no":32.99},{"price":28,"taker_yes":40.59,"maker_yes":15.24,"taker_no":12.36,"maker_no":31.81},{"price":29,"taker_yes":39.31,"maker_yes":15.82,"taker_no":12.33,"maker_no":32.55},{"price":30,"taker_yes":37.63,"maker_yes":16.11,"taker_no":12.76,"maker_no":33.5},{"price":31,"taker_yes":39.83,"maker_yes":15.33,"taker_no":11.8,"maker_no":33.04},{"price":32,"taker_yes":39.08,"maker_yes":15.14,"taker_no":11.5,"maker_no":34.28},{"price":33,"taker_yes":39.13,"maker_yes":15.08,"taker_no":12.05,"maker_no":33.73},{"price":34,"taker_yes":39.35,"maker_yes":13.73,"taker_no":12.62,"maker_no":34.3},{"price":35,"taker_yes":34.86,"maker_yes":14.98,"taker_no":12.61,"maker_no":37.56},{"price":36,"taker_yes":37.18,"maker_yes":14.5,"taker_no":11.54,"maker_no":36.78},{"price":37,"taker_yes":37.62,"maker_yes":14.0,"taker_no":11.29,"maker_no":37.09},{"price":38,"taker_yes":35.76,"maker_yes":14.57,"taker_no":12.56,"maker_no":37.11},{"price":39,"taker_yes":39.08,"maker_yes":13.62,"taker_no":12.22,"maker_no":35.08},{"price":40,"taker_yes":36.92,"maker_yes":14.73,"taker_no":13.22,"maker_no":35.13},{"price":41,"taker_yes":32.97,"maker_yes":14.64,"taker_no":11.54,"maker_no":40.86},{"price":42,"taker_yes":32.48,"maker_yes":15.17,"taker_no":11.09,"maker_no":41.26},{"price":43,"taker_yes":37.45,"maker_yes":13.62,"taker_no":12.06,"maker_no":36.87},{"price":44,"taker_yes":37.09,"maker_yes":13.56,"taker_no":11.74,"maker_no":37.61},{"price":45,"taker_yes":35.21,"maker_yes":14.36,"taker_no":12.86,"maker_no":37.56},{"price":46,"taker_yes":36.98,"maker_yes":13.75,"taker_no":11.89,"maker_no":37.38},{"price":47,"taker_yes":35.17,"maker_yes":13.73,"taker_no":12.29,"maker_no":38.8},{"price":48,"taker_yes":37.21,"maker_yes":13.61,"taker_no":12.81,"maker_no":36.37},{"price":49,"taker_yes":35.66,"maker_yes":14.98,"taker_no":13.39,"maker_no":35.97},{"price":50,"taker_yes":34.93,"maker_yes":15.07,"taker_no":15.07,"maker_no":34.94},{"price":51,"taker_yes":35.98,"maker_yes":13.39,"taker_no":14.98,"maker_no":35.65},{"price":52,"taker_yes":36.35,"maker_yes":12.81,"taker_no":13.61,"maker_no":37.22},{"price":53,"taker_yes":38.8,"maker_yes":12.3,"taker_no":13.73,"maker_no":35.17},{"price":54,"taker_yes":37.39,"maker_yes":11.89,"taker_no":13.75,"maker_no":36.97},{"price":55,"taker_yes":37.56,"maker_yes":12.86,"taker_no":14.36,"maker_no":35.22},{"price":56,"taker_yes":37.61,"maker_yes":11.74,"taker_no":13.56,"maker_no":37.09},{"price":57,"taker_yes":36.88,"maker_yes":12.06,"taker_no":13.62,"maker_no":37.44},{"price":58,"taker_yes":41.25,"maker_yes":11.08,"taker_no":15.17,"maker_no":32.49},{"price":59,"taker_yes":40.87,"maker_yes":11.54,"taker_no":14.64,"maker_no":32.95},{"price":60,"taker_yes":35.12,"maker_yes":13.22,"taker_no":14.73,"maker_no":36.94},{"price":61,"taker_yes":35.09,"maker_yes":12.22,"taker_no":13.62,"maker_no":39.06},{"price":62,"taker_yes":37.1,"maker_yes":12.56,"taker_no":14.57,"maker_no":35.77},{"price":63,"taker_yes":37.1,"maker_yes":11.29,"taker_no":14.0,"maker_no":37.61},{"price":64,"taker_yes":36.77,"maker_yes":11.54,"taker_no":14.49,"maker_no":37.2},{"price":65,"taker_yes":37.56,"maker_yes":12.6,"taker_no":14.97,"maker_no":34.86},{"price":66,"taker_yes":34.29,"maker_yes":12.62,"taker_no":13.73,"maker_no":39.36},{"price":67,"taker_yes":33.73,"maker_yes":12.05,"taker_no":15.08,"maker_no":39.14},{"price":68,"taker_yes":34.28,"maker_yes":11.5,"taker_no":15.13,"maker_no":39.09},{"price":69,"taker_yes":33.04,"maker_yes":11.8,"taker_no":15.33,"maker_no":39.83},{"price":70,"taker_yes":33.5,"maker_yes":12.76,"taker_no":16.11,"maker_no":37.64},{"price":71,"taker_yes":32.56,"maker_yes":12.33,"taker_no":15.82,"maker_no":39.3},{"price":72,"taker_yes":31.8,"maker_yes":12.36,"taker_no":15.24,"maker_no":40.6},{"price":73,"taker_yes":32.99,"maker_yes":11.43,"taker_no":14.77,"maker_no":40.82},{"price":74,"taker_yes":32.82,"maker_yes":11.07,"taker_no":17.04,"maker_no":39.07},{"price":75,"taker_yes":30.44,"maker_yes":11.95,"taker_no":17.71,"maker_no":39.91},{"price":76,"taker_yes":31.09,"maker_yes":11.2,"taker_no":16.9,"maker_no":40.8},{"price":77,"taker_yes":31.2,"maker_yes":11.1,"taker_no":16.51,"maker_no":41.19},{"price":78,"taker_yes":31.01,"maker_yes":11.09,"taker_no":17.14,"maker_no":40.76},{"price":79,"taker_yes":33.14,"maker_yes":11.1,"taker_no":17.32,"maker_no":38.43},{"price":80,"taker_yes":32.04,"maker_yes":12.56,"taker_no":17.97,"maker_no":37.43},{"price":81,"taker_yes":30.69,"maker_yes":11.8,"taker_no":17.54,"maker_no":39.97},{"price":82,"taker_yes":28.97,"maker_yes":11.64,"taker_no":18.28,"maker_no":41.11},{"price":83,"taker_yes":27.07,"maker_yes":12.13,"taker_no":18.13,"maker_no":42.67},{"price":84,"taker_yes":29.58,"maker_yes":11.01,"taker_no":18.88,"maker_no":40.53},{"price":85,"taker_yes":27.31,"maker_yes":12.16,"taker_no":19.85,"maker_no":40.68},{"price":86,"taker_yes":29.17,"maker_yes":11.42,"taker_no":19.04,"maker_no":40.36},{"price":87,"taker_yes":26.95,"maker_yes":11.88,"taker_no":18.97,"maker_no":42.2},{"price":88,"taker_yes":28.56,"maker_yes":10.83,"taker_no":19.83,"maker_no":40.79},{"price":89,"taker_yes":26.33,"maker_yes":11.02,"taker_no":20.47,"maker_no":42.18},{"price":90,"taker_yes":24.63,"maker_yes":12.56,"taker_no":20.94,"maker_no":41.88},{"price":91,"taker_yes":24.66,"maker_yes":12.26,"taker_no":19.95,"maker_no":43.13},{"price":92,"taker_yes":24.25,"maker_yes":11.94,"taker_no":20.35,"maker_no":43.46},{"price":93,"taker_yes":22.37,"maker_yes":11.81,"taker_no":20.69,"maker_no":45.14},{"price":94,"taker_yes":21.99,"maker_yes":11.22,"taker_no":21.99,"maker_no":44.8},{"price":95,"taker_yes":20.29,"maker_yes":11.84,"taker_no":23.05,"maker_no":44.82},{"price":96,"taker_yes":17.32,"maker_yes":12.67,"taker_no":22.68,"maker_no":47.33},{"price":97,"taker_yes":15.44,"maker_yes":17.76,"taker_no":23.07,"maker_no":43.74},{"price":98,"taker_yes":17.21,"maker_yes":13.04,"taker_no":23.78,"maker_no":45.97},{"price":99,"taker_yes":11.57,"maker_yes":22.76,"taker_no":23.05,"maker_no":42.62}],"xKey":"price","yKeys":["taker_yes","maker_yes","taker_no","maker_no"],"title":"YES vs NO Volume by Price","yUnit":"percent","xLabel":"YES Contract Price","yLabel":"Share of Volume (%)"}];
+
+/* ── Design system ────────────────────────────────────── */
+// Semantic color map: series key → design color
+const SEM = {
+  yes_ev:'#FF4785', taker_yes:'#FF4785', 'Maker bought YES':'#FF4785',
+  'YES EV':'#FF4785', actual:'#FF4785', deviation:'#FF4785',
+  VWAP:'#FF4785', 'Excess Return':'#FF4785', volume:'#FF4785',
+  Mean:'#FF4785', 'Maker Return':'#FF4785', 'Maker bought NO':'#26A69A',
+  no_ev:'#26A69A', taker_no:'#26A69A', 'NO EV':'#26A69A', Maker:'#26A69A',
+  maker_yes:'#FF9AB8', 'Excess Win Rate':'#FF4785',
+  maker_no:'#4DB6AC',
+  Taker:'#EF5350', 'Taker Return':'#EF5350',
+  'Maker (counterparty)':'#26A69A',
+  implied:'rgba(120,123,134,.75)', 'Implied probability':'rgba(120,123,134,.75)',
+  Combined:'#FF9AB8',
+  '95% CI Lower':'rgba(255,71,133,.25)', '95% CI Upper':'rgba(255,71,133,.25)',
+  Median:'#FF9AB8',
+  // price range bands for stacked-bar-100
+  '1_10':'#7A1D41','11_20':'#A02553','21_30':'#C73066','31_40':'#E63D75',
+  '41_50':'#FF4785','51_60':'#FF6B9D','61_70':'#FF9AB8',
+  '71_80':'#26A69A','81_90':'#4DB6AC','91_99':'#80CBC4',
+};
+const FALLBACK = ['#FF4785','#26A69A','#FF9AB8','#EF5350','#FFC7D9',
+                  '#787B86','#C73066','#4DB6AC','#FF6B9D','#E63D75'];
+function getColor(key, idx){ return SEM[key] || FALLBACK[idx % FALLBACK.length]; }
+
+const GRID = 'rgba(255,255,255,.05)';
+const TICK = '#787B86';
+
+/* ── Formatters ───────────────────────────────────────── */
+function fmtVal(v, unit){
+  if(unit==='cents')  return `${v>=0?'+':''}${v.toFixed(2)}¢`;
+  if(unit==='percent') return `${v>=0?'+':''}${v.toFixed(2)}%`;
+  if(unit==='dollars'){
+    const abs=Math.abs(v);
+    if(abs>=1e9) return `$${(v/1e9).toFixed(2)}B`;
+    if(abs>=1e6) return `$${(v/1e6).toFixed(2)}M`;
+    if(abs>=1e3) return `$${(v/1e3).toFixed(1)}K`;
+    return `$${v.toFixed(2)}`;
+  }
+  return String(v);
+}
+function tickFmt(v, unit){
+  if(unit==='cents')  return `${v}¢`;
+  if(unit==='percent') return `${v}%`;
+  if(unit==='dollars'){
+    if(Math.abs(v)>=1e9) return `$${(v/1e9).toFixed(1)}B`;
+    if(Math.abs(v)>=1e6) return `$${(v/1e6).toFixed(0)}M`;
+    if(Math.abs(v)>=1e3) return `$${(v/1e3).toFixed(0)}K`;
+    return `$${v}`;
+  }
+  return `${v}`;
+}
+
+/* ── Tooltip defaults ─────────────────────────────────── */
+function tooltipCfg(spec, extra){
+  return Object.assign({
+    backgroundColor:'#161823', borderColor:'rgba(255,71,133,.35)', borderWidth:1,
+    titleColor:'#FF6B9D', bodyColor:'#E8E9ED',
+    padding:{x:14,y:10}, cornerRadius:8, boxPadding:4,
+    titleFont:{family:"'Chakra Petch',sans-serif",weight:'600',size:12},
+    bodyFont:{family:"'JetBrains Mono',monospace",size:12},
+    usePointStyle:true, pointStyle:'circle',
+  }, extra);
+}
+
+/* ── Crosshair plugin ─────────────────────────────────── */
+Chart.register({
+  id:'crosshair',
+  afterDraw(chart){
+    if(!chart._ch) return;
+    const {ctx,chartArea:{top,bottom,left,right}}=chart;
+    ctx.save();ctx.setLineDash([4,4]);ctx.lineWidth=1;
+    ctx.strokeStyle='rgba(255,71,133,.3)';
+    ctx.beginPath();ctx.moveTo(chart._ch.x,top);ctx.lineTo(chart._ch.x,bottom);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(left,chart._ch.y);ctx.lineTo(right,chart._ch.y);ctx.stroke();
+    ctx.restore();
+  },
+  afterEvent(chart,{event:e}){
+    chart._ch = e.type==='mousemove'?{x:e.x,y:e.y}:null;
+    chart.draw();
+  }
+});
+
+/* ── Gradient helper ──────────────────────────────────── */
+function makeGrad(ctx, hex, h=400){
+  const g = ctx.createLinearGradient(0,0,0,h);
+  const r=parseInt(hex.slice(1,3),16),gr=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  g.addColorStop(0,   `rgba(${r},${gr},${b},.35)`);
+  g.addColorStop(.5,  `rgba(${r},${gr},${b},.1)`);
+  g.addColorStop(1,   `rgba(${r},${gr},${b},0)`);
+  return g;
+}
+
+/* ── Scale defaults ───────────────────────────────────── */
+function xScale(extra){
+  return Object.assign({grid:{color:GRID,drawBorder:false},border:{display:false},ticks:{color:TICK}},extra);
+}
+function yScale(unit, extra){
+  return Object.assign({
+    grid:{color:GRID,drawBorder:false},border:{display:false},
+    ticks:{color:TICK,callback:v=>tickFmt(v,unit)},
+  },extra);
+}
+
+/* ═══════════════════════════════════════════════════════
+   CHART RENDERERS
+═══════════════════════════════════════════════════════ */
+
+function renderLine(spec, canvas){
+  const ctx=canvas.getContext('2d');
+  const labels = spec.data.map(d=>d[spec.xKey]);
+  const datasets = spec.yKeys.map((k,i)=>{
+    const color=getColor(k,i);
+    const isDashed=k.includes('implied')||k.includes('Implied')||k.includes('CI');
+    const isCI=k.includes('CI');
+    return {
+      label:k, data:spec.data.map(d=>d[k]),
+      borderColor:color, backgroundColor:isCI?color:'transparent',
+      borderWidth: isDashed?1.5:2, borderDash: isDashed?[5,4]:[],
+      pointRadius:0, pointHoverRadius:isCI?0:6,
+      pointHoverBackgroundColor:color, pointHoverBorderColor:'#0D0E12',
+      pointHoverBorderWidth:2, tension:.3,
+      fill: isCI && i>0 ? '-1' : false,
+    };
+  });
+  // For win_rate_by_trade_size — CI fill between series 1 and 2
+  if(spec.yKeys.includes('95% CI Lower')){
+    const lower=datasets.find(d=>d.label==='95% CI Lower');
+    const upper=datasets.find(d=>d.label==='95% CI Upper');
+    const main =datasets.find(d=>d.label==='Excess Win Rate');
+    if(lower) { lower.borderColor='transparent'; lower.fill=false; }
+    if(upper) { upper.borderColor='transparent'; upper.fill=datasets.indexOf(lower); }
+    if(main)  { main.fill=false; main.borderWidth=2; }
+  }
+  new Chart(ctx,{
+    type:'line',data:{labels,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      animation:{duration:700,easing:'easeInOutQuart'},
+      plugins:{legend:{display:false},tooltip:tooltipCfg(spec,{
+        callbacks:{
+          title:i=>`${spec.xLabel||spec.xKey}: ${i[0].label}${spec.yUnit==='cents'?'¢':''}`,
+          label:i=>`  ${i.dataset.label}: ${fmtVal(i.parsed.y,spec.yUnit)}`,
+          labelColor:i=>({borderColor:'transparent',backgroundColor:i.dataset.borderColor||i.dataset.borderColor,borderRadius:3}),
+        }
+      })},
+      scales:{
+        x:xScale({ticks:{color:TICK,maxTicksLimit:20,callback:v=>spec.yUnit==='cents'?`${v}¢`:v}}),
+        y:yScale(spec.yUnit,{
+          grid:{
+            color:ctx2=>ctx2.tick&&ctx2.tick.value===0?'rgba(255,71,133,.3)':GRID,
+            lineWidth:ctx2=>ctx2.tick&&ctx2.tick.value===0?1.5:1,
+            drawBorder:false
+          }
+        }),
+      }
+    }
+  });
+}
+
+function renderArea(spec, canvas){
+  const ctx=canvas.getContext('2d');
+  const labels = spec.data.map(d=>d[spec.xKey]);
+  const datasets = spec.yKeys.map((k,i)=>{
+    const color=getColor(k,i);
+    let hexColor=color;
+    if(hexColor.startsWith('rgba')) hexColor='#FF4785';
+    return {
+      label:k, data:spec.data.map(d=>d[k]),
+      borderColor:color, backgroundColor:makeGrad(ctx,hexColor),
+      borderWidth:2, pointRadius:0,
+      pointHoverRadius:6, pointHoverBackgroundColor:color,
+      pointHoverBorderColor:'#0D0E12', pointHoverBorderWidth:2,
+      tension:.35, fill:true,
+    };
+  });
+
+  // Smart x-axis tick for dates
+  const isDate = typeof spec.data[0]?.[spec.xKey]==='string' &&
+                 spec.data[0][spec.xKey].match(/^\d{4}-\d{2}/);
+  const seenYears=new Set();
+  new Chart(ctx,{
+    type:'line',data:{labels,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      animation:{duration:900,easing:'easeInOutQuart'},
+      plugins:{legend:{display:false},tooltip:tooltipCfg(spec,{
+        callbacks:{
+          title:i=>i[0].label,
+          label:i=>`  ${i.dataset.label}: ${fmtVal(i.parsed.y,spec.yUnit)}`,
+          labelColor:()=>({borderColor:'transparent',backgroundColor:'#FF4785',borderRadius:3}),
+        }
+      })},
+      scales:{
+        x:xScale({ticks:{color:TICK,maxRotation:0,autoSkip:false,callback(_,idx){
+          if(!isDate) return spec.data[idx]?.[spec.xKey]??'';
+          const d=spec.data[idx]?.date;
+          if(!d) return '';
+          const yr=d.slice(0,4), mo=d.slice(5,7);
+          if(!seenYears.has(yr)){seenYears.add(yr);return yr;}
+          if(mo==='07'&&!seenYears.has(yr+'-H2')){seenYears.add(yr+'-H2');return yr+'H2';}
+          return '';
+        }}}),
+        y:yScale(spec.yUnit),
+      }
+    }
+  });
+}
+
+function renderBar(spec, canvas){
+  const ctx=canvas.getContext('2d');
+  const labels=spec.data.map(d=>d[spec.xKey]??d[Object.keys(d)[0]]);
+  const datasets=spec.yKeys.map((k,i)=>{
+    const color=getColor(k,i);
+    return {
+      label:k,
+      data:spec.data.map(d=>d[k]),
+      backgroundColor:spec.data.map(d=>{
+        // Color bars by positive/negative for single-series
+        if(spec.yKeys.length===1){
+          return d[k]>=0?'rgba(255,71,133,.75)':'rgba(239,83,80,.75)';
+        }
+        return color+'CC';
+      }),
+      borderColor:spec.data.map(d=>{
+        if(spec.yKeys.length===1) return d[k]>=0?'#FF4785':'#EF5350';
+        return color;
+      }),
+      borderWidth:1, borderRadius:4, borderSkipped:false,
+      hoverBackgroundColor:spec.data.map(d=>{
+        if(spec.yKeys.length===1) return d[k]>=0?'#FF4785':'#EF5350';
+        return color;
+      }),
+    };
+  });
+  new Chart(ctx,{
+    type:'bar',data:{labels,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      animation:{duration:700,easing:'easeInOutQuart'},
+      plugins:{legend:{display:spec.yKeys.length>1},
+        legend:{display:false},
+        tooltip:tooltipCfg(spec,{
+          callbacks:{
+            title:i=>`${i[0].label}`,
+            label:i=>`  ${i.dataset.label}: ${fmtVal(i.parsed.y,spec.yUnit)}`,
+            labelColor:i=>({borderColor:'transparent',
+              backgroundColor:Array.isArray(i.dataset.backgroundColor)?i.dataset.backgroundColor[i.dataIndex]:i.dataset.backgroundColor,
+              borderRadius:3}),
+          }
+        })
+      },
+      scales:{
+        x:xScale({ticks:{color:TICK}}),
+        y:yScale(spec.yUnit,{
+          grid:{color:ctx2=>ctx2.tick&&ctx2.tick.value===0?'rgba(255,71,133,.3)':GRID,
+            lineWidth:ctx2=>ctx2.tick&&ctx2.tick.value===0?1.5:1,drawBorder:false}
+        }),
+      }
+    }
+  });
+}
+
+function renderStackedBar100(spec, canvas){
+  const ctx=canvas.getContext('2d');
+  const labels=spec.data.map(d=>d[spec.xKey]);
+  const datasets=spec.yKeys.map((k,i)=>{
+    const color=getColor(k,i);
+    return {
+      label:k, data:spec.data.map(d=>d[k]),
+      backgroundColor:color+'E0', borderColor:color,
+      borderWidth:.5, borderSkipped:false,
+      hoverBackgroundColor:color,
+    };
+  });
+  new Chart(ctx,{
+    type:'bar',data:{labels,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      animation:{duration:700},
+      plugins:{legend:{display:false},
+        tooltip:tooltipCfg(spec,{
+          callbacks:{
+            title:i=>`${i[0].label}`,
+            label:i=>`  ${i.dataset.label}: ${i.parsed.y.toFixed(1)}%`,
+            labelColor:i=>({borderColor:'transparent',backgroundColor:i.dataset.borderColor,borderRadius:3}),
+          }
+        })
+      },
+      scales:{
+        x:xScale({stacked:true,ticks:{color:TICK,maxRotation:35}}),
+        y:yScale('percent',{stacked:true,min:0,max:100,ticks:{color:TICK,callback:v=>`${v}%`}}),
+      }
+    }
+  });
+}
+
+function renderStackedArea100(spec, canvas){
+  const ctx=canvas.getContext('2d');
+  const labels=spec.data.map(d=>d[spec.xKey]);
+  const datasets=spec.yKeys.map((k,i)=>{
+    const color=getColor(k,i);
+    return {
+      label:k, data:spec.data.map(d=>d[k]),
+      borderColor:color, backgroundColor:color+'99',
+      borderWidth:1.5, pointRadius:0, pointHoverRadius:5,
+      pointHoverBackgroundColor:color, tension:.2, fill:true,
+    };
+  });
+  new Chart(ctx,{
+    type:'line',data:{labels,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      animation:{duration:700},
+      plugins:{legend:{display:false},
+        tooltip:tooltipCfg(spec,{
+          callbacks:{
+            title:i=>`${spec.xLabel||'Price'}: ${i[0].label}¢`,
+            label:i=>`  ${i.dataset.label}: ${i.parsed.y.toFixed(1)}%`,
+            labelColor:i=>({borderColor:'transparent',backgroundColor:i.dataset.borderColor,borderRadius:3}),
+          }
+        })
+      },
+      scales:{
+        x:xScale({stacked:true,ticks:{color:TICK,maxTicksLimit:20}}),
+        y:yScale('percent',{stacked:true,min:0,max:100,ticks:{color:TICK,callback:v=>`${v}%`}}),
+      }
+    }
+  });
+}
+
+/* Treemap rendered as sorted horizontal bar */
+function renderTreemap(spec, canvas){
+  const ctx=canvas.getContext('2d');
+  const sorted=[...spec.data].sort((a,b)=>b.value-a.value);
+  const labels=sorted.map(d=>d.name);
+  const values=sorted.map(d=>d.value);
+  const maxV=Math.max(...values);
+  new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[{
+        label:'Volume',data:values,
+        backgroundColor:FALLBACK.map(c=>c+'CC'),
+        borderColor:FALLBACK,
+        borderWidth:1,borderRadius:6,borderSkipped:false,
+        hoverBackgroundColor:FALLBACK,
+      }]
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true,maintainAspectRatio:false,
+      animation:{duration:700,easing:'easeInOutQuart'},
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},
+        tooltip:tooltipCfg(spec,{
+          callbacks:{
+            title:i=>[i[0].label],
+            label:i=>`  Volume: ${fmtVal(i.parsed.x,'dollars')}`,
+            labelColor:i=>({borderColor:'transparent',
+              backgroundColor:Array.isArray(i.dataset.backgroundColor)?i.dataset.backgroundColor[i.dataIndex]:'#FF4785',
+              borderRadius:3}),
+          }
+        })
+      },
+      scales:{
+        x:xScale({ticks:{color:TICK,callback:v=>tickFmt(v,'dollars')}}),
+        y:{grid:{display:false},border:{display:false},ticks:{color:TICK}},
+      }
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUILD DOM + RENDER ALL
+═══════════════════════════════════════════════════════ */
+const BADGE_LABELS = {
+  'line':'Line Chart','area':'Area Chart','bar':'Bar Chart',
+  'stacked-bar-100':'Stacked Bar (100%)','stacked-area-100':'Stacked Area (100%)',
+  'treemap':'Volume Breakdown',
+};
+const HEIGHT = {
+  'bar':360,'stacked-bar-100':380,'stacked-area-100':400,
+  'treemap':440,'line':400,'area':400,
+};
+
+function legendItems(spec){
+  const skip=['95% CI Lower','95% CI Upper'];
+  return spec.yKeys
+    ? spec.yKeys
+        .filter(k=>!skip.includes(k))
+        .map((k,i)=>{
+          const color=getColor(k,i);
+          const dashed=k.includes('implied')||k.includes('Implied');
+          return `<div class="legend-item">
+            <div class="legend-swatch${dashed?' dashed':''}" style="${dashed?`--c:${color};background:none`:''};background:${dashed?'none':color};"></div>
+            <span>${k}</span></div>`;
+        }).join('')
+    : '';
+}
+
+function descFor(spec){
+  if(spec.yUnit==='cents')   return `Values in cents per contract`;
+  if(spec.yUnit==='percent') return `Values in percentage points`;
+  if(spec.yUnit==='dollars') return `Notional trading volume in USD`;
+  return '';
+}
+
+const main=document.getElementById('main');
+document.getElementById('chartCount').textContent=`${CHART_SPECS.length} charts`;
+
+CHART_SPECS.forEach((spec,idx)=>{
+  const h = HEIGHT[spec.type]||400;
+  const yLabelHtml = (spec.yLabel||spec.yUnit)
+    ? `<span class="y-label">${spec.yLabel||spec.yUnit}</span>` : '';
+  const xLabelHtml = spec.xLabel
+    ? `<div class="x-label">${spec.xLabel}</div>` : '';
+
+  const card=document.createElement('div');
+  card.className='chart-card';
+  card.style.animationDelay=`${idx*0.05+0.05}s`;
+  card.innerHTML=`
+    <div class="badge">${BADGE_LABELS[spec.type]||spec.type}</div>
+    <h2 class="chart-title">${spec.title}</h2>
+    <p class="card-desc">${spec.yLabel||descFor(spec)}</p>
+    <div class="legend">${legendItems(spec)}</div>
+    <div class="axis-wrapper">
+      ${yLabelHtml}
+      <div class="chart-box" style="height:${h}px">
+        <canvas id="c${idx}"></canvas>
+      </div>
+      ${xLabelHtml}
+    </div>`;
+  main.appendChild(card);
+
+  const canvas=document.getElementById('c'+idx);
+  requestAnimationFrame(()=>{
+    switch(spec.type){
+      case 'line':            renderLine(spec,canvas);        break;
+      case 'area':            renderArea(spec,canvas);        break;
+      case 'bar':             renderBar(spec,canvas);         break;
+      case 'stacked-bar-100': renderStackedBar100(spec,canvas);break;
+      case 'stacked-area-100':renderStackedArea100(spec,canvas);break;
+      case 'treemap':         renderTreemap(spec,canvas);     break;
+    }
+  });
+});
+</script>
+</body>
+</html>
