@@ -249,6 +249,101 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Data Analysis Section */}
+      <section className="py-24 px-6 relative overflow-hidden bg-bg-primary">
+        {/* Pink particles */}
+        {[
+          { left: "8%",  size: 4,  delay: 0,   dur: 7,  drift: "30px"  },
+          { left: "18%", size: 3,  delay: 1.5, dur: 9,  drift: "-25px" },
+          { left: "27%", size: 5,  delay: 0.7, dur: 8,  drift: "20px"  },
+          { left: "36%", size: 3,  delay: 2.3, dur: 11, drift: "-30px" },
+          { left: "45%", size: 6,  delay: 0.3, dur: 6,  drift: "15px"  },
+          { left: "54%", size: 4,  delay: 1.8, dur: 10, drift: "-20px" },
+          { left: "63%", size: 3,  delay: 0.9, dur: 8,  drift: "35px"  },
+          { left: "72%", size: 5,  delay: 2.6, dur: 7,  drift: "-15px" },
+          { left: "81%", size: 4,  delay: 1.2, dur: 9,  drift: "25px"  },
+          { left: "90%", size: 3,  delay: 0.5, dur: 12, drift: "-28px" },
+          { left: "13%", size: 2,  delay: 3.1, dur: 8,  drift: "18px"  },
+          { left: "58%", size: 2,  delay: 2.0, dur: 10, drift: "-22px" },
+          { left: "77%", size: 3,  delay: 3.8, dur: 7,  drift: "12px"  },
+          { left: "42%", size: 2,  delay: 4.2, dur: 9,  drift: "-35px" },
+          { left: "23%", size: 4,  delay: 3.5, dur: 11, drift: "28px"  },
+        ].map((p, i) => (
+          <div
+            key={i}
+            className="data-particle"
+            style={{
+              left: p.left,
+              bottom: "0%",
+              width: p.size,
+              height: p.size,
+              animationDelay: `${p.delay}s`,
+              animationDuration: `${p.dur}s`,
+              ["--drift" as string]: p.drift,
+              opacity: 0,
+            }}
+          />
+        ))}
+
+        {/* Glow orb */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-pink-500/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            {/* Left: text */}
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/20 mb-6">
+                <svg className="w-3.5 h-3.5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <span className="text-pink-400 text-xs font-semibold font-[family-name:var(--font-chakra)] uppercase tracking-wider">Market Research</span>
+              </div>
+              <h2 className="font-[family-name:var(--font-chakra)] text-3xl md:text-4xl font-bold text-pink-50 mb-4 leading-tight">
+                Deep Dive into<br />
+                <span className="bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent">Market Microstructure</span>
+              </h2>
+              <p className="text-text-secondary text-lg mb-8 leading-relaxed">
+                Explore maker vs. taker dynamics, calibration bias, longshot effects, and win-rate patterns across Kalshi prediction markets — backed by real trade data.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link
+                  href="/data-analysis"
+                  className="group inline-flex items-center gap-3 bg-pink-500 hover:bg-pink-400 text-white px-6 py-3 rounded-xl font-medium text-sm transition-all duration-200 hover:shadow-[0_0_20px_rgba(255,71,133,0.5)]"
+                >
+                  Explore Analytics
+                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+
+            {/* Right: stats preview */}
+            <div className="bg-bg-secondary border border-border rounded-2xl p-6 space-y-4">
+              <div className="flex items-center gap-2 mb-5">
+                <div className="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse-soft" />
+                <span className="font-[family-name:var(--font-chakra)] text-sm font-semibold text-pink-50">Live Insights</span>
+                <span className="ml-auto bg-pink-500/10 text-pink-400 text-xs font-semibold font-[family-name:var(--font-chakra)] px-2 py-0.5 rounded-full uppercase tracking-wide">Kalshi</span>
+              </div>
+              {[
+                { label: "Maker Avg Return",   value: "+8.3%",   sub: "vs taker –4.1%",    color: "text-bullish"   },
+                { label: "Longshot Bias",       value: "Detected", sub: "overpriced at <10¢", color: "text-pink-400"  },
+                { label: "Calibration Drift",   value: "±6.2pp",  sub: "across price buckets",color: "text-text-primary"},
+                { label: "Peak Trading Hour",   value: "14:00 UTC",sub: "highest VWAP spread", color: "text-pink-400"  },
+              ].map((stat, i) => (
+                <div key={i} className="flex items-center justify-between py-3 border-b border-border last:border-0">
+                  <div>
+                    <div className="text-xs text-text-tertiary font-[family-name:var(--font-mono)] mb-0.5">{stat.label}</div>
+                    <div className="text-xs text-text-tertiary/60">{stat.sub}</div>
+                  </div>
+                  <span className={`font-[family-name:var(--font-mono)] font-semibold text-sm ${stat.color}`}>{stat.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* About Us Section */}
       <section className="py-20 px-6 bg-bg-secondary/30">
         <div className="max-w-7xl mx-auto">

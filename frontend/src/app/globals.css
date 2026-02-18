@@ -298,6 +298,23 @@ body {
   animation: shimmer 1.5s infinite;
 }
 
+/* Pink particle float */
+@keyframes particle-rise {
+  0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+  10%  { opacity: 1; }
+  50%  { transform: translateY(-45vh) translateX(var(--drift, 20px)) scale(0.8); }
+  90%  { opacity: 0.6; }
+  100% { transform: translateY(-90vh) translateX(calc(var(--drift, 20px) * -0.5)) scale(0.4); opacity: 0; }
+}
+.data-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--pink-400) 0%, var(--pink-600) 100%);
+  box-shadow: 0 0 6px rgba(255, 71, 133, 0.6);
+  animation: particle-rise linear infinite;
+  pointer-events: none;
+}
+
 /* Sakura pattern overlay */
 .sakura-pattern {
   position: relative;

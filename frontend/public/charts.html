@@ -508,7 +508,7 @@ function descFor(spec){
 }
 
 const main=document.getElementById('main');
-document.getElementById('chartCount').textContent=`${CHART_SPECS.length} charts`;
+const _cc=document.getElementById('chartCount');if(_cc)_cc.textContent=`${CHART_SPECS.length} charts`;
 
 CHART_SPECS.forEach((spec,idx)=>{
   const h = HEIGHT[spec.type]||400;
