@@ -1,9 +1,18 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function LandingPage() {
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://platform.twitter.com/widgets.js";
+    script.async = true;
+    document.body.appendChild(script);
+    return () => { document.body.removeChild(script); };
+  }, []);
+
   return (
     <main className="min-h-screen bg-bg-primary sakura-pattern relative overflow-hidden">
       {/* Animated Background Elements */}
@@ -79,16 +88,11 @@ export default function LandingPage() {
               </a>
             </div>
 
-            {/* Demo Video */}
-            <div className="mt-10 animate-fade-in-up stagger-4">
-              <video
-                className="w-full max-w-3xl mx-auto rounded-2xl border border-border shadow-2xl"
-                src="/li.mp4"
-                autoPlay
-                muted
-                loop
-                playsInline
-              />
+            {/* Demo Video Tweet */}
+            <div className="mt-10 flex justify-center animate-fade-in-up stagger-4">
+              <blockquote className="twitter-tweet" data-theme="dark">
+                <a href="https://x.com/PredictBack/status/2026604793888706842"></a>
+              </blockquote>
             </div>
           </div>
 
