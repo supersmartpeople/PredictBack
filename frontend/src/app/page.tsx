@@ -78,6 +78,18 @@ export default function LandingPage() {
                 </svg>
               </a>
             </div>
+
+            {/* Demo Video */}
+            <div className="mt-10 animate-fade-in-up stagger-4">
+              <video
+                className="w-full max-w-3xl mx-auto rounded-2xl border border-border shadow-2xl"
+                src="/0224.mov"
+                autoPlay
+                muted
+                loop
+                playsInline
+              />
+            </div>
           </div>
 
           {/* Hero Visual */}
