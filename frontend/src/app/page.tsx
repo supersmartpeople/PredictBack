@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 
+export default function LandingPage() {
   return (
     <main className="min-h-screen bg-bg-primary sakura-pattern relative overflow-hidden">
       {/* Animated Background Elements */}
